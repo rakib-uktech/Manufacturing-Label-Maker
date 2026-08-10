@@ -1,0 +1,1475 @@
+﻿@page
+@model IndexModel
+@using Newtonsoft.Json
+<script>
+    var productList = @Html.Raw(JsonConvert.SerializeObject(Model.Productlist));
+</script>
+
+
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- jQuery FIRST -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+    <!-- DataTables Buttons -->
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+
+    <!-- Export dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+
+    <!-- DataTables Buttons CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap4.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+
+
+    <script>
+        $(document).ready(function () {
+            $("#myModal").modal('show');
+        });
+    </script>
+   
+
+    <style>
+        /* Custom styling for POS screen */
+        .pos-container {
+            margin-top: 20px;
+        }
+
+        .cart-summary {
+            background-color: #f8f9fa;
+            padding: 10px;
+        }
+
+        .product-grid {
+            height: 460px;
+            overflow-y: scroll; /* Keep scroll but hide scrollbar */
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+        }
+
+            .product-grid::-webkit-scrollbar {
+                display: none; /* Chrome, Safari, and Opera */
+            }
+
+        .table-grid {
+            height: 690px;
+            overflow-y: scroll; /* Keep scroll but hide scrollbar */
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+        }
+
+            .table-grid::-webkit-scrollbar {
+                display: none; /* Chrome, Safari, and Opera */
+            }
+
+        /* Adjust card styling */
+        .product-card {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+
+        .cart-table tbody tr td:last-child {
+            text-align: right;
+        }
+
+        .total-amount {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .btn-checkout {
+            font-size: 1.2rem;
+        }
+
+        /* Optional: Set a max-width for the cards in case of small screens */
+        .product-grid .card {
+            max-width: 100%; /* Ensures the card does not overflow the grid */
+        }
+
+        .card-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+
+        .animated-card {
+            background-color: #ffffff;
+            padding: 0px;
+            border-radius: 0px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+            margin-bottom: 10px;
+        }
+
+            .animated-card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0px 15px 30px rgba(0, 0, 0, 0.2);
+            }
+
+        .card-body {
+            text-align: center;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .card-text {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary i {
+            padding-right: 5px;
+            font-size: 1.1rem; /* Adjust icon size */
+        }
+
+        .custom-input {
+            border: 2px solid #007bff; /* Blue border color */
+            border-top: 0;
+            border-left: 0;
+            border-right: 0;
+            padding: 5px;
+            outline: none;
+            transition: border-color 0.3s ease-in-out;
+        }
+
+            .custom-input:focus {
+                border-color: #0056b3; /* Slightly darker blue for focus */
+            }
+       
+        .btn-icon-only {
+            background: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 4px 6px !important;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .btn-icon-only:hover {
+            color: #007bff;
+            background: none !important;
+        }
+
+        /* Add this to your custom CSS file or inside a <style> block */
+        .tab-content .tab-pane {
+            margin-top: 20px; /* Add space between the tab and table */
+        }
+
+        .label-btn {
+            min-width: 100px;
+            font-weight: 600;
+        }
+
+            .label-btn.active {
+                background-color: #0d6efd;
+                color: #fff;
+                box-shadow: 0 0 0 2px rgba(13,110,253,.3);
+            }
+
+        .label-type-scroll {
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            padding-bottom: 6px;
+        }
+        /* keep buttons in one row */
+        .label-type-row {
+            flex-wrap: nowrap;
+        }
+
+
+
+            /* Optional – nicer scrollbar (Chrome / Edge) */
+            .label-type-scroll::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .label-type-scroll::-webkit-scrollbar-thumb {
+                background-color: #adb5bd;
+                border-radius: 4px;
+            }
+
+        .label-btn {
+            min-width: 100px;
+            flex: 0 0 auto; /* prevent shrinking */
+            font-weight: 600;
+        }
+
+        /* Mobile */
+        @@media (max-width: 768px) {
+            .label-type-scroll
+
+        {
+            padding-bottom: 10px;
+        }
+
+        }
+    </style>
+</head>
+<body>
+       
+    <div class="row">
+
+        <div class="col-xl-3 col-lg-2">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Create Label</h6>
+                   
+                    <ul class="navbar-nav ml-auto">
+
+                        <!-- Nav Item - Messages -->
+                        <li class="nav-item dropdown no-arrow mx-1">
+
+                            <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                            </a>
+
+                            <!-- Dropdown - Messages -->
+                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                    aria-labelledby="messagesDropdown">
+                                <h6 class="dropdown-header">
+                                    Action Recuired
+                                </h6>
+                                <a class="dropdown-item d-flex align-items-center" href="javascript:void(0);" onclick="exportTableToExcel('example', 'item_data')">
+                                    <div class="dropdown-list-image mr-3">
+                                        <img class="rounded" src="~/images/xls.png" width="30" height="30"
+                                                alt="...">
+                                        <div class="status-indicator"></div>
+                                    </div>
+                                    <div>
+                                        <div class="text-truncate">
+                                            Download to Excel
+                                        </div>
+
+                                    </div>
+                                </a>
+
+                                <a class="dropdown-item d-flex align-items-center" href="javascript:void(0);" onclick="exportTableToPDF()">
+                                    <div class="dropdown-list-image mr-3">
+                                        <img class="rounded" src="~/images/download-pdf.png" width="30" height="30"
+                                                alt="...">
+                                        <div class="status-indicator"></div>
+                                    </div>
+                                    <div>
+                                        <div class="text-truncate">
+                                            Download to PDF
+                                        </div>
+
+                                    </div>
+                                </a>
+                                <a class="dropdown-item d-flex align-items-center" href="WorkOrderCompletion">
+                                    <div class="dropdown-list-image mr-3">
+                                        <img class="rounded" src="~/images/download-pdf.png" width="30" height="30"
+                                             alt="...">
+                                        <div class="status-indicator"></div>
+                                    </div>
+                                    <div>
+                                        <div class="text-truncate">
+                                            Download to PDF
+                                        </div>
+
+                                    </div>
+                                </a>
+
+                            </div>
+                        </li>
+
+
+                    </ul>
+
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body">
+
+                    <div class="table-grid">
+                        <section>
+                            <div class="row d-flex justify-content-center">
+                                
+                                <form method="POST" id="modal-form" onsubmit="handleFormSubmit(event)" class="form-card" enctype="multipart/form-data">
+                                    <div class="row justify-content-center">
+                                        <div class="row justify-content-center text-center Border rounded-2">
+                                            <div id="results">
+
+                                                <!-- Work Order & Sales Order -->
+                                                <div class="row">
+
+                                                    <!-- Work Order -->
+                                                    <div class="col-md-6 mb-3">
+                                                        <label class="form-control-label px-3">
+                                                            Work Order <span class="text-danger">*</span>
+                                                        </label>
+
+                                                        <input class="custom-input"
+                                                               list="WorkOrderOptions"
+                                                               id="WorkOrder"
+                                                               name="WorkOrder">
+
+                                                        <datalist id="WorkOrderOptions">
+                                                            @foreach (var workorderList in Model.Productlist)
+                                                            {
+                                                                <option value="@workorderList.Ref_No"></option>
+                                                            }
+                                                        </datalist>
+                                                    </div>
+
+                                                    <!-- Sales Order -->
+                                                    <div class="col-md-6 mb-3">
+                                                        <label class="form-control-label px-3">
+                                                            Sales Order
+                                                        </label>
+
+                                                        <input class="custom-input"
+                                                               list="SalesOrderOptions"
+                                                               id="SalesOrder"
+                                                               name="SalesOrder"
+                                                               placeholder="Optional">
+
+                                                        <datalist id="SalesOrderOptions">
+                                                            @foreach (var so in Model.SalesOrderList)
+                                                            {
+                                                                <option value="@so.SalesOrder"></option>
+                                                            }
+                                                        </datalist>
+
+                                                        <input type="hidden"
+                                                               id="SalesOrderInternalId"
+                                                               name="SalesOrderInternalId" />
+                                                    </div>
+
+                                                </div>
+
+                                                <!-- Ship Address (Initially Hidden) -->
+                                                <div class="row justify-content-between text-left" id="ShipAddressCard" style="display:none;">
+                                                    <div class="form-group col-sm-12 flex-column d-flex">
+                                                        <label class="form-control-label px-3">
+                                                            Ship Address
+                                                        </label>
+
+                                                        <textarea class="custom-input"
+                                                                  id="ShipAddress"
+                                                                  name="ShipAddress"
+                                                                  rows="4"
+                                                                  readonly></textarea>
+                                                    </div>
+                                                </div>
+                                                <!-- Label Type -->
+                                              
+                                                @{
+                                                    // Define default options
+                                                    var defaultLabelTypes = new List<string> { "Case", "Pallet", "SBUX", "KBA", "CC", "Shipping" };
+
+                                                    // Extract database values
+                                                    var dbLabelTypes = Model.LabelTypelist.Select(t => t.Label_Type).Distinct().ToList();
+
+                                                    // Merge and eliminate duplicates (case-insensitive)
+                                                    var allLabelTypes = defaultLabelTypes
+                                                    .Concat(dbLabelTypes)
+                                                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                                                    .ToList();
+                                                }
+                                                <div class="row mb-3">
+                                                    <div class="col-12">
+                                                        <label class="form-control-label">
+                                                            Label Type <span class="text-danger">*</span>
+                                                        </label>
+
+                                                        <div class="label-type-scroll mt-2">
+                                                            <div class="d-flex gap-2 label-type-row" id="labelTypeButtons">
+                                                                @foreach (var label in allLabelTypes)
+                                                                {
+                                                                    <button type="button"
+                                                                            class="btn btn-outline-primary label-btn @(label == "Case" ? "active" : "")"
+                                                                            data-value="@label">
+                                                                        @label
+                                                                    </button>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row justify-content-between text-left d-none">
+                                                    <div class="form-group col-sm-12 flex-column d-flex">
+                                                        <label class="form-control-label px-3">
+                                                            Label Type<span class="text-danger"> *</span>
+                                                        </label>
+                                                        <input class="custom-input"
+                                                               list="LabelTypeOptions"
+                                                               id="LabelType"
+                                                               name="LabelType"
+                                                               value="Case">
+                                                        <datalist id="LabelTypeOptions">
+                                                            @foreach (var label in allLabelTypes)
+                                                            {
+                                                                <option value="@label">@label</option>
+                                                            }
+                                                        </datalist>
+                                                    </div>
+                                                </div>
+
+
+                                                <!-- Item No. -->
+                                                <div class="row justify-content-between text-left">
+                                                    <div class="form-group col-sm-12 flex-column d-flex">
+                                                        <label class="form-control-label px-3">Item No.<span class="text-danger"> *</span></label>
+                                                        <input class="custom-input" list="Item_NolistOptions" id="Item_No" name="Item_No" value="@Model.labelinfo.Product" placeholder="Enter Item No.">
+                                                        <datalist id="Item_NolistOptions">
+                                                            @foreach (var Item_Nolist in Model.Productlist.DistinctBy(x => x.Product))
+                                                            {
+                                                                <option value="@Item_Nolist.Product">@Item_Nolist.Product</option>
+                                                            }
+                                                        </datalist>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Item Name -->
+                                                <div class="row justify-content-between text-left">
+                                                    <div class="form-group col-sm-12 flex-column d-flex">
+                                                        <label class="form-control-label px-3">Item Name<span class="text-danger"> *</span></label>
+                                                        <input class="custom-input" list="Item_NamelistOptions" id="Item_Name" name="Item_Name" value="@Model.labelinfo.Description" placeholder="Enter Item Name">
+                                                        <datalist id="Item_NamelistOptions">
+                                                            @foreach (var Item_Namelist in Model.Productlist.DistinctBy(x => x.Description))
+                                                            {
+                                                                <option value="@Item_Namelist.Description">@Item_Namelist.Description</option>
+                                                            }
+                                                        </datalist>
+                                                        <small id="item_nameError" class="form-text text-danger"></small>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Hidden Internal ID -->
+                                                <input type="hidden" id="Internal_Id" name="Internal_Id" value="@Model.labelinfo.intid" />
+                                                <!-- Hidden Customer -->
+                                                <input type="hidden" id="Customer" name="Customer" value="@Model.labelinfo.Customer" />
+
+                                                <!-- Label Qty -->
+                                                <div class="row justify-content-between text-left">
+                                                    <div class="form-group col-sm-12 flex-column d-flex">
+                                                        <label class="form-control-label px-3">Label Qty<span class="text-danger"> *</span></label>
+                                                        <input type="number" class="custom-input" name="Label_Qty" id="Label_Qty" value="1">
+                                                    </div>
+                                                </div>
+                                                <!-- Build Qty (Conditional Display) -->
+                                                <div class="row justify-content-between text-left" id="BuildQtyGroup" style="display: none;">
+                                                    <div class="form-group col-sm-12 flex-column d-flex">
+                                                        <label class="form-control-label px-3">Build Qty<span class="text-danger"> *</span></label>
+                                                        <input type="number" class="custom-input" name="Build_Qty" id="Build_Qty" value="0">
+                                                    </div>
+                                                </div>
+                                                <!-- Action Buttons -->
+                                                <div class="row justify-content-center text-center">
+                                                    <div class="form-group col-sm-6 flex-column d-flex">
+                                                        <button type="submit" class="btn btn-block btn-success mb-3">
+                                                            <i class="bi bi-floppy me-2"></i>Save
+                                                        </button>
+                                                    </div>
+                                                    <div class="form-group col-sm-6 flex-column d-flex">
+                                                        <button type="button" class="btn btn-block btn-danger mb-3" onclick="closeApp()">
+                                                            <i class="bi bi-x-square me-2"></i>Close
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </section>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-9 col-lg-8">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Label List</h6>
+                    <ul class="navbar-nav ml-auto">
+
+                        <!-- Nav Item - Messages -->
+                        <li class="nav-item dropdown no-arrow mx-1">
+
+                            <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+
+                            </a>
+
+                            <!-- Dropdown - Messages -->
+                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                    aria-labelledby="messagesDropdown">
+                                <h6 class="dropdown-header">
+                                    Action Recuired
+                                </h6>
+                                <a class="dropdown-item d-flex align-items-center" href="javascript:void(0);" onclick="exportTableToExcel('example', 'item_data')">
+                                    <div class="dropdown-list-image mr-3">
+                                        <img class="rounded" src="~/images/xls.png" width="30" height="30"
+                                                alt="...">
+                                        <div class="status-indicator"></div>
+                                    </div>
+                                    <div>
+                                        <div class="text-truncate">
+                                            Download to Excel
+                                        </div>
+
+                                    </div>
+                                </a>
+
+                                <a class="dropdown-item d-flex align-items-center" href="javascript:void(0);" onclick="exportTableToPDF()">
+                                    <div class="dropdown-list-image mr-3">
+                                        <img class="rounded" src="~/images/download-pdf.png" width="30" height="30"
+                                                alt="...">
+                                        <div class="status-indicator"></div>
+                                    </div>
+                                    <div>
+                                        <div class="text-truncate">
+                                            Download to PDF
+                                        </div>
+
+                                    </div>
+                                </a>
+
+                            </div>
+                        </li>
+
+                    </ul>
+                       
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="card-body text-center">
+
+                        <div class="form-group col-sm-12 flex-column d-flex">
+                            <div class="row flex-nowrap overflow-auto">
+
+                                <!-- Case Card -->
+                                <div class="col-md-3">
+                                    <a href="javascript:void(0);" onclick="copyToClipboardCase()" class="text-decoration-none">
+                                        <div class="card border-left-primary shadow h-100 py-2">
+                                            <div class="card-body text-center">
+                                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                    <i class="fas fa-box fa-lg mr-2"></i> Case Number
+                                                </div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                    <span id="caseCount">@Model.CaseCount.FirstOrDefault()?.CaseCount</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <!-- Pallet Card -->
+                                <div class="col-md-3">
+                                    <a href="javascript:void(0);" onclick="copyToClipboardPallet()" class="text-decoration-none">
+                                        <div class="card border-left-success shadow h-100 py-2">
+                                            <div class="card-body text-center">
+                                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                    <i class="fas fa-dolly fa-lg mr-2"></i> Pallet Number
+                                                </div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                    <span id="palletCount">@Model.PalletCount.FirstOrDefault()?.PalletCount</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <!-- SBUX Card -->
+                                <div class="col-md-3">
+                                    <a href="javascript:void(0);" onclick="copyToClipboardSBUX()" class="text-decoration-none">
+                                        <div class="card border-left-dark shadow h-100 py-2">
+                                            <div class="card-body text-center">
+                                                <div class="text-xs font-weight-bold text-dark text-uppercase mb-1">
+                                                    <i class="fas fa-coffee fa-lg mr-2"></i> SBUX Number
+                                                </div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                    <span id="sbuxCount">@Model.SBUXCount.FirstOrDefault()?.SBUXCount</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <!-- KBA Card -->
+                                <div class="col-md-3">
+                                    <a href="javascript:void(0);" onclick="copyToClipboardKba()" class="text-decoration-none">
+                                        <div class="card border-left-info shadow h-100 py-2">
+                                            <div class="card-body text-center">
+                                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                    <i class="fas fa-print fa-lg mr-2"></i> KBA Number
+                                                </div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                    <span id="kbaCount">@Model.KbaCount.FirstOrDefault()?.KbaCount</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <!-- C&C Card -->
+                                <div class="col-md-3">
+                                    <a href="javascript:void(0);" onclick="copyToClipboardCC()" class="text-decoration-none">
+                                        <div class="card border-left-warning shadow h-100 py-2">
+                                            <div class="card-body text-center">
+                                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                    <i class="fas fa-cut fa-lg mr-2"></i> C&C Number
+                                                </div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                    <span id="ccCount">@Model.CCCount.FirstOrDefault()?.CCCount</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <!-- Shipping Card -->
+                                <div class="col-md-3">
+                                    <a href="javascript:void(0);" onclick="copyToClipboardShipping()" class="text-decoration-none">
+                                        <div class="card border-left-info shadow h-100 py-2">
+                                            <div class="card-body text-center">
+                                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                    <i class="fas fa-truck fa-lg mr-2"></i> Shipping Number
+                                                </div>
+                                                
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                    <span id="shippingCount">@Model.ShippingCount.FirstOrDefault()?.ShippingCount</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="product-grid">
+                            <div class="row" id="productList">
+
+                                <div class="col-lg-12 col-md-11 mb-4">
+
+                                    <div id="results">
+                                        <input type="text" id="globalSearch" placeholder="Search All" class="form-control mb-2">
+
+                                        @if (Model.listLabel != null && Model.listLabel.Any())
+                                        {
+                                            <!-- Tab Headers -->
+                                            <ul class="nav nav-tabs" id="labelTabs" role="tablist">
+                                                <li class="nav-item">
+                                                    <a class="nav-link active" id="case-tab" data-toggle="tab" href="#case" role="tab" aria-controls="case" aria-selected="true">Case</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" id="pallet-tab" data-toggle="tab" href="#pallet" role="tab" aria-controls="pallet" aria-selected="false">Pallet</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" id="kba-tab" data-toggle="tab" href="#kba" role="tab" aria-controls="kba" aria-selected="false">KBA</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" id="cc-tab" data-toggle="tab" href="#cc" role="tab" aria-controls="cc" aria-selected="false">Cut & Crease</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" id="sbux-tab" data-toggle="tab" href="#sbux" role="tab" aria-controls="sbux" aria-selected="false">SBUX Case</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" id="shipping-tab" data-toggle="tab" href="#shipping" role="tab">
+                                                        Shipping
+                                                    </a>
+                                                </li>
+                                            </ul>
+
+                                            <!-- Tab Contents -->
+                                            <div class="tab-content" id="labelTabsContent">
+                                                <!-- Pallet Type Tab -->
+                                                <div class="tab-pane fade" id="pallet" role="tabpanel" aria-labelledby="pallet-tab">
+                                                    <table id="palletTable" class="table table-responsive-sm table-bordered table-hover" width="100%" cellspacing="0">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>ID</th>
+                                                                <th>W/O No.</th>
+                                                                <th>Date</th>
+                                                                <th>Product</th>
+                                                                <th>Description</th>
+                                                                <th>Type</th>
+                                                                <th>Qty</th>
+                                                                <th>Reference</th>
+                                                                <th>Comment</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody class="align-middle">
+                                                            @foreach (var item in Model.listLabel.Where(x => x.Label_Type == "Pallet"))
+                                                            {
+                                                                <tr>
+                                                                    <td>
+                                                                        <span>@item.id</span>
+                                                                        <a href="/Print?id=@item.intid&intid=@item.id" class="btn btn-sm btn-light ms-2 js-nav-link" title="Print Label">
+                                                                            <i class="fas fa-print"></i>
+                                                                        </a>
+                                                                    </td>
+                                                                    <td>@item.Work_Order</td>
+                                                                    <td>@item.Create_Date</td>
+                                                                    <td style="text-align: left;">@item.Product</td>
+                                                                    <td style="text-align: left;">@item.Description</td>
+                                                                    <td>@item.Label_Type</td>
+                                                                    <td>@item.Label_Qty</td>
+                                                                    <td style="text-align: left;">@item.Label_No</td>
+                                                                    <td style="text-align: left;">@item.Comment</td>
+                                                                    <td>
+                                                                        <ul class="navbar-nav ml-auto">
+                                                                            <li class="nav-item dropdown no-arrow mx-1">
+                                                                                <a class="nav-link dropdown-toggle" href="#" id="palletActionsDropdown" role="button"
+                                                                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                                                                </a>
+                                                                                <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                                                                     aria-labelledby="palletActionsDropdown">
+
+                                                                                    <h6 class="dropdown-header text-uppercase small fw-bold">
+                                                                                        Action Required
+                                                                                    </h6>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/Label_Edit?id=@item.id">
+                                                                                        <i class="bi bi-pencil-square text-primary fs-5 me-3"></i>
+                                                                                        <span>Edit Label</span>
+                                                                                    </a>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/Label_Print?id=@item.intid&intid=@item.id">
+                                                                                        <i class="bi bi-file-earmark-pdf text-danger fs-5 me-3"></i>
+                                                                                        <span>Download Label</span>
+                                                                                    </a>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/Print?id=@item.intid&intid=@item.id">
+                                                                                        <i class="bi bi-printer text-success fs-5 me-3"></i>
+                                                                                        <span>Print Label</span>
+                                                                                    </a>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/PrintDuplicate?id=@item.intid&intid=@item.id">
+                                                                                        <i class="bi bi-files text-warning fs-5 me-3"></i>
+                                                                                        <span>Duplicate Label</span>
+                                                                                    </a>
+
+                                                                                </div>
+
+                                                                            </li>
+                                                                        </ul>
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <!-- Case Type Tab -->
+                                                <div class="tab-pane fade show active" id="case" role="tabpanel" aria-labelledby="case-tab">
+                                                    <table id="caseTable" class="table table-responsive-sm table-bordered table-hover" width="100%" cellspacing="0">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>ID</th>
+                                                                <th>W/O No.</th>
+                                                                <th>Date</th>
+                                                                <th>Product</th>
+                                                                <th>Description</th>
+                                                                <th>Type</th>
+                                                                <th>Qty</th>
+                                                                <th>Reference</th>
+                                                                <th>Comment</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody class="align-middle">
+                                                            @foreach (var item in Model.listLabel.Where(x => x.Label_Type == "Case"))
+                                                            {
+                                                                <tr>
+                                                                    <td>
+                                                                        <span>@item.id</span>
+                                                                        <a href="/Print?id=@item.intid&intid=@item.id" class="btn btn-sm btn-light ms-2 js-nav-link" title="Print Label">
+                                                                            <i class="fas fa-print"></i>
+                                                                        </a>
+                                                                    </td>
+                                                                    <td>@item.Work_Order</td>
+                                                                    <td>@item.Create_Date</td>
+                                                                    <td style="text-align: left;">@item.Product</td>
+                                                                    <td style="text-align: left;">@item.Description</td>
+                                                                    <td>@item.Label_Type</td>
+                                                                    <td>@item.Label_Qty</td>
+                                                                    <td style="text-align: left;">@item.Label_No</td>
+                                                                    <td style="text-align: left;">@item.Comment</td>
+                                                                    <td>
+                                                                        <ul class="navbar-nav ml-auto">
+                                                                            <li class="nav-item dropdown no-arrow mx-1">
+                                                                                <a class="nav-link dropdown-toggle" href="#" id="caseActionsDropdown" role="button"
+                                                                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                                                                </a>
+                                                                                <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                                                                     aria-labelledby="palletActionsDropdown">
+
+                                                                                    <h6 class="dropdown-header text-uppercase small fw-bold">
+                                                                                        Action Required
+                                                                                    </h6>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/Label_Edit?id=@item.id">
+                                                                                        <i class="bi bi-pencil-square text-primary fs-5 me-3"></i>
+                                                                                        <span>Edit Label</span>
+                                                                                    </a>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/Label_Print?id=@item.intid&intid=@item.id">
+                                                                                        <i class="bi bi-file-earmark-pdf text-danger fs-5 me-3"></i>
+                                                                                        <span>Download Label</span>
+                                                                                    </a>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/Print?id=@item.intid&intid=@item.id">
+                                                                                        <i class="bi bi-printer text-success fs-5 me-3"></i>
+                                                                                        <span>Print Label</span>
+                                                                                    </a>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/PrintDuplicate?id=@item.intid&intid=@item.id">
+                                                                                        <i class="bi bi-files text-warning fs-5 me-3"></i>
+                                                                                        <span>Duplicate Label</span>
+                                                                                    </a>
+
+                                                                                </div>
+
+                                                                            </li>
+                                                                        </ul>
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <!-- KBA Type Tab -->
+                                            
+                                                <div class="tab-pane fade" id="kba" role="tabpanel" aria-labelledby="kba-tab">
+                                                    <table id="kbaTable" class="table table-responsive-sm table-bordered table-hover" width="100%" cellspacing="0">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>ID</th>
+                                                                <th>W/O No.</th>
+                                                                <th>Date</th>
+                                                                <th>Product</th>
+                                                                <th>Description</th>
+                                                                <th>Type</th>
+                                                                <th>Qty</th>
+                                                                <th>Sheet</th>
+                                                                <th>Reference</th>
+                                                                <th>Comment</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody class="align-middle">
+                                                            @foreach (var item in Model.listLabel.Where(x => x.Label_Type == "KBA"))
+                                                            {
+                                                                <tr>
+                                                                    <td>
+                                                                        <span>@item.id</span>
+                                                                        <a href="/Print?id=@item.intid&intid=@item.id" class="btn btn-sm btn-light ms-2 js-nav-link" title="Print Label">
+                                                                            <i class="fas fa-print"></i>
+                                                                        </a>
+                                                                    </td>
+                                                                    <td>@item.Work_Order</td>
+                                                                    <td>@item.Create_Date</td>
+                                                                    <td style="text-align: left;">@item.Product</td>
+                                                                    <td style="text-align: left;">@item.Description</td>
+                                                                    <td>@item.Label_Type</td>
+                                                                    <td>@item.Label_Qty</td>
+                                                                    <td>@item.Build_Qty</td>
+                                                                    <td style="text-align: left;">@item.Label_No</td>
+                                                                    <td style="text-align: left;">@item.Comment</td>
+                                                                    <td>
+                                                                        <ul class="navbar-nav ml-auto">
+                                                                            <li class="nav-item dropdown no-arrow mx-1">
+                                                                                <a class="nav-link dropdown-toggle" href="#" id="caseActionsDropdown" role="button"
+                                                                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                                                                </a>
+                                                                                <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                                                                     aria-labelledby="palletActionsDropdown">
+
+                                                                                    <h6 class="dropdown-header text-uppercase small fw-bold">
+                                                                                        Action Required
+                                                                                    </h6>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/Label_Edit?id=@item.id">
+                                                                                        <i class="bi bi-pencil-square text-primary fs-5 me-3"></i>
+                                                                                        <span>Edit Label</span>
+                                                                                    </a>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/Label_Print?id=@item.intid&intid=@item.id">
+                                                                                        <i class="bi bi-file-earmark-pdf text-danger fs-5 me-3"></i>
+                                                                                        <span>Download Label</span>
+                                                                                    </a>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/Print?id=@item.intid&intid=@item.id">
+                                                                                        <i class="bi bi-printer text-success fs-5 me-3"></i>
+                                                                                        <span>Print Label</span>
+                                                                                    </a>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/PrintDuplicate?id=@item.intid&intid=@item.id">
+                                                                                        <i class="bi bi-files text-warning fs-5 me-3"></i>
+                                                                                        <span>Duplicate Label</span>
+                                                                                    </a>
+
+                                                                                </div>
+
+                                                                            </li>
+                                                                        </ul>
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <!-- C&C Type Tab -->
+
+                                                <div class="tab-pane fade" id="cc" role="tabpanel" aria-labelledby="cc-tab">
+                                                    <table id="ccTable" class="table table-responsive-sm table-bordered table-hover" width="100%" cellspacing="0">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>ID</th>
+                                                                <th>W/O No.</th>
+                                                                <th>Date</th>
+                                                                <th>Product</th>
+                                                                <th>Description</th>
+                                                                <th>Type</th>
+                                                                <th>Qty</th>
+                                                                <th>Sheet</th>
+                                                                <th>Reference</th>
+                                                                <th>Comment</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody class="align-middle">
+                                                            @foreach (var item in Model.listLabel.Where(x => x.Label_Type == "CC"))
+                                                            {
+                                                                <tr>
+                                                                    <td>
+                                                                        <span>@item.id</span>
+                                                                        <a href="/Print?id=@item.intid&intid=@item.id" class="btn btn-sm btn-light ms-2 js-nav-link" title="Print Label">
+                                                                            <i class="fas fa-print"></i>
+                                                                        </a>
+                                                                    </td>
+                                                                    <td>@item.Work_Order</td>
+                                                                    <td>@item.Create_Date</td>
+                                                                    <td style="text-align: left;">@item.Product</td>
+                                                                    <td style="text-align: left;">@item.Description</td>
+                                                                    <td>@item.Label_Type</td>
+                                                                    <td>@item.Label_Qty</td>
+                                                                    <td>@item.Build_Qty</td>
+                                                                    <td style="text-align: left;">@item.Label_No</td>
+                                                                    <td style="text-align: left;">@item.Comment</td>
+                                                                    <td>
+                                                                        <ul class="navbar-nav ml-auto">
+                                                                            <li class="nav-item dropdown no-arrow mx-1">
+                                                                                <a class="nav-link dropdown-toggle" href="#" id="caseActionsDropdown" role="button"
+                                                                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                                                                </a>
+                                                                                <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                                                                     aria-labelledby="palletActionsDropdown">
+
+                                                                                    <h6 class="dropdown-header text-uppercase small fw-bold">
+                                                                                        Action Required
+                                                                                    </h6>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/Label_Edit?id=@item.id">
+                                                                                        <i class="bi bi-pencil-square text-primary fs-5 me-3"></i>
+                                                                                        <span>Edit Label</span>
+                                                                                    </a>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/Label_Print?id=@item.intid&intid=@item.id">
+                                                                                        <i class="bi bi-file-earmark-pdf text-danger fs-5 me-3"></i>
+                                                                                        <span>Download Label</span>
+                                                                                    </a>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/Print?id=@item.intid&intid=@item.id">
+                                                                                        <i class="bi bi-printer text-success fs-5 me-3"></i>
+                                                                                        <span>Print Label</span>
+                                                                                    </a>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/PrintDuplicate?id=@item.intid&intid=@item.id">
+                                                                                        <i class="bi bi-files text-warning fs-5 me-3"></i>
+                                                                                        <span>Duplicate Label</span>
+                                                                                    </a>
+
+                                                                                </div>
+
+                                                                            </li>
+                                                                        </ul>
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <!-- C&C Type Tab -->
+
+                                                <div class="tab-pane fade" id="sbux" role="tabpanel" aria-labelledby="sbux-tab">
+                                                    <table id="sbuxTable" class="table table-responsive-sm table-bordered table-hover" width="100%" cellspacing="0">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>ID</th>
+                                                                <th>W/O No.</th>
+                                                                <th>Date</th>
+                                                                <th>Product</th>
+                                                                <th>Description</th>
+                                                                <th>Type</th>
+                                                                <th>Qty</th>
+                                                                <th>Sheet</th>
+                                                                <th>Reference</th>
+                                                                <th>Comment</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody class="align-middle">
+                                                            @foreach (var item in Model.listLabel.Where(x => x.Label_Type == "SBUX"))
+                                                            {
+                                                                <tr>
+                                                                    <td>
+                                                                        <span>@item.id</span>
+                                                                        <a href="/Print?id=@item.intid&intid=@item.id" class="btn btn-sm btn-light ms-2 js-nav-link" title="Print Label">
+                                                                            <i class="fas fa-print"></i>
+                                                                        </a>
+                                                                    </td>
+                                                                    <td>@item.Work_Order</td>
+                                                                    <td>@item.Create_Date</td>
+                                                                    <td style="text-align: left;">@item.Product</td>
+                                                                    <td style="text-align: left;">@item.Description</td>
+                                                                    <td>@item.Label_Type</td>
+                                                                    <td>@item.Label_Qty</td>
+                                                                    <td>@item.Build_Qty</td>
+                                                                    <td style="text-align: left;">@item.Label_No</td>
+                                                                    <td style="text-align: left;">@item.Comment</td>
+                                                                    <td>
+                                                                        <ul class="navbar-nav ml-auto">
+                                                                            <li class="nav-item dropdown no-arrow mx-1">
+                                                                                <a class="nav-link dropdown-toggle" href="#" id="caseActionsDropdown" role="button"
+                                                                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                                                                </a>
+                                                                                <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                                                                     aria-labelledby="palletActionsDropdown">
+
+                                                                                    <h6 class="dropdown-header text-uppercase small fw-bold">
+                                                                                        Action Required
+                                                                                    </h6>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/Label_Edit?id=@item.id">
+                                                                                        <i class="bi bi-pencil-square text-primary fs-5 me-3"></i>
+                                                                                        <span>Edit Label</span>
+                                                                                    </a>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/Label_Print?id=@item.intid&intid=@item.id">
+                                                                                        <i class="bi bi-file-earmark-pdf text-danger fs-5 me-3"></i>
+                                                                                        <span>Download Label</span>
+                                                                                    </a>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/Print?id=@item.intid&intid=@item.id">
+                                                                                        <i class="bi bi-printer text-success fs-5 me-3"></i>
+                                                                                        <span>Print Label</span>
+                                                                                    </a>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/PrintDuplicate?id=@item.intid&intid=@item.id">
+                                                                                        <i class="bi bi-files text-warning fs-5 me-3"></i>
+                                                                                        <span>Duplicate Label</span>
+                                                                                    </a>
+
+                                                                                </div>
+
+                                                                            </li>
+                                                                        </ul>
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <!-- Shipping Type Tab -->
+
+                                                <div class="tab-pane fade" id="shipping" role="tabpanel" aria-labelledby="shipping-tab">
+                                                    <table id="shippingTable" class="table table-responsive-sm table-bordered table-hover" width="100%" cellspacing="0">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>ID</th>
+                                                                <th>W/O No.</th>
+                                                                <th>Date</th>
+                                                                <th>Product</th>
+                                                                <th>Description</th>
+                                                                <th>Type</th>
+                                                                <th>Qty</th>
+                                                                <th>Sheet</th>
+                                                                <th>Reference</th>
+                                                                <th>Comment</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody class="align-middle">
+                                                            @foreach (var item in Model.listLabel.Where(x => x.Label_Type == "Shipping"))
+                                                            {
+                                                                <tr>
+                                                                    <td>
+                                                                        <span>@item.id</span>
+                                                                        <a href="/Print?id=@item.intid&intid=@item.id" class="btn btn-sm btn-light ms-2 js-nav-link" title="Print Label">
+                                                                            <i class="fas fa-print"></i>
+                                                                        </a>
+                                                                    </td>
+                                                                    <td>@item.Work_Order</td>
+                                                                    <td>@item.Create_Date</td>
+                                                                    <td style="text-align: left;">@item.Product</td>
+                                                                    <td style="text-align: left;">@item.Description</td>
+                                                                    <td>@item.Label_Type</td>
+                                                                    <td>@item.Label_Qty</td>
+                                                                    <td>@item.Build_Qty</td>
+                                                                    <td style="text-align: left;">@item.Label_No</td>
+                                                                    <td style="text-align: left;">@item.Comment</td>
+                                                                    <td>
+                                                                        <ul class="navbar-nav ml-auto">
+                                                                            <li class="nav-item dropdown no-arrow mx-1">
+                                                                                <a class="nav-link dropdown-toggle" href="#" id="caseActionsDropdown" role="button"
+                                                                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                                                                </a>
+                                                                                <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                                                                     aria-labelledby="palletActionsDropdown">
+
+                                                                                    <h6 class="dropdown-header text-uppercase small fw-bold">
+                                                                                        Action Required
+                                                                                    </h6>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/Label_Edit?id=@item.id">
+                                                                                        <i class="bi bi-pencil-square text-primary fs-5 me-3"></i>
+                                                                                        <span>Edit Label</span>
+                                                                                    </a>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/Label_Print?id=@item.intid&intid=@item.id">
+                                                                                        <i class="bi bi-file-earmark-pdf text-danger fs-5 me-3"></i>
+                                                                                        <span>Download Label</span>
+                                                                                    </a>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/Print?id=@item.intid&intid=@item.id">
+                                                                                        <i class="bi bi-printer text-success fs-5 me-3"></i>
+                                                                                        <span>Print Label</span>
+                                                                                    </a>
+
+                                                                                    <a class="dropdown-item d-flex align-items-center js-nav-link"
+                                                                                       href="/PrintDuplicate?id=@item.intid&intid=@item.id">
+                                                                                        <i class="bi bi-files text-warning fs-5 me-3"></i>
+                                                                                        <span>Duplicate Label</span>
+                                                                                    </a>
+
+                                                                                </div>
+
+                                                                            </li>
+                                                                        </ul>
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                            </div>
+
+
+                                        }
+                                        else if (Model.listLabel != null)
+                                        {
+                                            <p>No results found.</p>
+                                        }
+                                    </div>
+
+
+                                </div>
+                                    
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+       
+
+</body>
+</html>
+
+
+@section Scripts {
+    <!-- 🧠 Product Autofill & Label Type Logic -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const workOrderInput = document.getElementById("WorkOrder");
+            const itemNoInput = document.getElementById("Item_No");
+            const itemNameInput = document.getElementById("Item_Name");
+            const internalIdInput = document.getElementById("Internal_Id");
+            const customerInput = document.getElementById("Customer");
+            const labelTypeInput = document.getElementById("LabelType");
+            const buildQtyGroup = document.getElementById("BuildQtyGroup");
+
+            function updateLabelType(itemNo, itemName, customer) {
+                const no = itemNo?.trim().toUpperCase() || "";
+                const name = itemName?.trim().toUpperCase() || "";
+                const cust = customer?.trim().toUpperCase() || "";
+
+                let labelType = "Case";
+
+                if (no.startsWith("FG") && (name.startsWith("STARBUCKS") || cust.startsWith("STARBUCKS"))) {
+                    labelType = "SBUX";
+                } else if (no.startsWith("KBA")) {
+                    labelType = "KBA";
+                } else if (no.startsWith("CC")) {
+                    labelType = "CC";
+                }
+
+                setLabelType(labelType);   // ✅ THIS updates UI + hidden input
+                toggleBuildQtyVisibility();
+            }
+
+
+            function toggleBuildQtyVisibility() {
+                const value = labelTypeInput.value.trim().toUpperCase();
+                buildQtyGroup.style.display = (value === 'KBA' || value === 'CC' || value === 'Shipping') ? 'flex' : 'none';
+            }
+
+            workOrderInput.addEventListener("input", function () {
+                const matched = productList.find(p => p.Ref_No === this.value);
+                if (matched) {
+                    itemNoInput.value = matched.Product;
+                    itemNameInput.value = matched.Description;
+                    internalIdInput.value = matched.intid;
+                    updateLabelType(matched.Product, matched.Description);
+                } else {
+                    itemNoInput.value = "";
+                    itemNameInput.value = "";
+                    internalIdInput.value = "";
+                    labelTypeInput.value = "";
+                }
+                toggleBuildQtyVisibility();
+            });
+
+            itemNoInput.addEventListener("input", function () {
+                const matched = productList.find(p => p.Product === this.value);
+                if (matched) {
+                    itemNameInput.value = matched.Description;
+                    internalIdInput.value = matched.intid;
+                    updateLabelType(this.value, matched.Description);
+                } else {
+                    itemNameInput.value = "";
+                    internalIdInput.value = "";
+                    updateLabelType(this.value, "");
+                }
+                toggleBuildQtyVisibility();
+            });
+
+            labelTypeInput.addEventListener("input", toggleBuildQtyVisibility);
+            toggleBuildQtyVisibility(); // Initial run
+        });
+    </script>
+
+    <!-- 📊 DataTable Initialization & Global Search -->
+
+    <script>
+        $(document).ready(function () {
+            const tableIds = ['palletTable', 'caseTable', 'kbaTable', 'ccTable', 'sbuxTable', 'shippingTable'];
+            const commonTableOptions = {
+                paging: true,
+                order: [[0, 'desc']], // Default order by first column (id) descending
+                dom: 'Bfrtip',
+                buttons: [
+                    { extend: 'copy', text: '<i class="fas fa-copy"></i>', className: 'btn btn-light btn-sm' },
+                    { extend: 'excel', text: '<i class="fas fa-file-excel"></i>', className: 'btn btn-success btn-sm' },
+                    { extend: 'pdf', text: '<i class="fas fa-file-pdf"></i>', className: 'btn btn-danger btn-sm' },
+                    { extend: 'print', text: '<i class="fas fa-print"></i>', className: 'btn btn-primary btn-sm' }
+                ]
+            };
+
+            tableIds.forEach(id => {
+                $('#' + id).DataTable($.extend(true, {}, commonTableOptions));
+            });
+
+            $('#globalSearch').on('keyup', function () {
+                tableIds.forEach(id => $('#' + id).DataTable().search(this.value).draw());
+            });
+
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function () {
+                $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+            });
+        });
+    </script>
+
+    <!-- 📋 Clipboard Copy Utilities -->
+    <script>
+        function copyToClipboardById(elementId, label) {
+            const text = document.getElementById(elementId)?.innerText;
+            if (!text) {
+                alert(`${label} not found or empty.`);
+                return;
+            }
+
+            const tempInput = document.createElement('input');
+            tempInput.style.position = 'absolute';
+            tempInput.style.left = '-9999px';
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            alert(`Copied: ${text}`);
+        }
+
+        function copyToClipboardCase() { copyToClipboardById('caseCount', 'Case Count'); }
+        function copyToClipboardPallet() { copyToClipboardById('palletCount', 'Pallet Count'); }
+        function copyToClipboardKba() { copyToClipboardById('kbaCount', 'KBA Count'); }
+        function copyToClipboardCC() { copyToClipboardById('ccCount', 'C&C Count'); }
+        function copyToClipboardShipping() { copyToClipboardById('shippingCount', 'Shipping Count'); }
+        function copyToClipboardSBUX() { copyToClipboardById('sbuxCount', 'SBUX Count'); }
+    </script>
+
+    <!-- 🚫 Form Close Confirmation -->
+    <script>
+        let recordSubmitted = false;
+
+        function handleFormSubmit() {
+            recordSubmitted = true;
+        }
+
+        function closeApp() {
+            if (recordSubmitted) {
+                alert("Please reload the page before closing.");
+            } else {
+                if (confirm("Are you sure you want to close the application?")) {
+                    window.close(); // May only work for windows opened by script
+                }
+            }
+        }
+    </script>
+    <script>
+        function setLabelType(value) {
+            const input = document.getElementById("LabelType");
+
+            input.value = value;
+
+            document.querySelectorAll('.label-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.value === value);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // Button clicks
+            document.querySelectorAll('.label-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    setLabelType(this.dataset.value);
+                });
+            });           
+        });
+    </script>
+
+    <script>
+        const salesOrders = @Html.Raw(JsonConvert.SerializeObject(Model.SalesOrderList));
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const salesOrderInput = document.getElementById("SalesOrder");
+            const shipAddress = document.getElementById("ShipAddress");
+            const shipAddressCard = document.getElementById("ShipAddressCard");
+            const salesOrderInternalId = document.getElementById("SalesOrderInternalId");
+
+            salesOrderInput.addEventListener("input", function () {
+
+                const selected = salesOrders.find(s => s.SalesOrder === this.value);
+
+                if (selected) {
+                    shipAddress.value = selected.ShipAddress || "";
+                    salesOrderInternalId.value = selected.SalesOrderInternalId;
+
+                    shipAddressCard.style.display = "block";
+
+                    // Automatically select Shipping label
+                    setLabelType("Shipping");
+                }
+                else {
+                    shipAddress.value = "";
+                    salesOrderInternalId.value = "";
+
+                    shipAddressCard.style.display = "none";
+
+                    // Revert back to Case
+                    setLabelType("Case");
+                }
+
+                // Update Build Qty visibility
+                toggleBuildQtyVisibility();
+            });
+
+        });
+    </script>
+
+}

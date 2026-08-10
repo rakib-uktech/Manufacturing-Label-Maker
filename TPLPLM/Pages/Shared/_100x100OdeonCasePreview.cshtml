@@ -1,0 +1,82 @@
+﻿@model TPLPLM.Pages.PrintModel
+
+<!-- Include JsBarcode CDN -->
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
+<div class="label-preview case-label" style="width:400px; height:400px; border:1px solid #000; padding:10px; font-family:Arial, sans-serif; font-size:11px;">
+
+    <!-- Header with Logo + Barcode -->
+    <div style="display:flex; align-items:center; margin-bottom:15px;">
+        <img src="/images/mono.jpg" alt="Logo" style="height:50px; margin-right:20px;" />
+        <svg id="labelBarcode" style="height:35px; width:200px;"></svg>
+        <script>
+            JsBarcode("#labelBarcode", "@Model.labelinfo.Label_No", {
+                format: "CODE128",
+                lineColor: "#000",
+                width: 1.5,
+                height: 35,
+                displayValue: false
+            });
+        </script>
+    </div>
+
+    <!-- Address -->
+    @if (!string.IsNullOrEmpty(Model.Address))
+    {
+        <div style="margin-bottom:10px;">
+            <p style="font-size:9px; margin:0;">@Model.Address</p>
+            <hr style="border:2px solid #000; margin-top:8px; margin-bottom:8px;" />
+        </div>
+    }
+
+    <!-- Rows -->
+    <p><strong>Client:</strong> <span style="font-size:16px; font-weight:bold;">@(string.IsNullOrWhiteSpace(Model.AssemblyItem?.Custitem13) ? "N/A" : Model.AssemblyItem?.Custitem13)</span></p>
+    <p><strong>Order Code:</strong> @(string.IsNullOrWhiteSpace(Model.AssemblyItem?.Custitemproduct_Spec_Sku) ? "N/A" : Model.AssemblyItem?.Custitemproduct_Spec_Sku)</p>
+
+    <!-- Wrapped Description -->
+    <p style="word-wrap:break-word; max-width:280px;">
+        <strong>Description:</strong> @(string.IsNullOrWhiteSpace(Model.AssemblyItem?.Description) ? "N/A" : Model.AssemblyItem.Description)
+    </p>
+
+    <!-- Inline Case Row -->
+    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+        <span><strong>Case Qty:</strong> @(decimal.TryParse(Model.AssemblyItem?.Custitemproduct_Spec_Qtyperouter as string, out decimal qty) ? Math.Round(qty).ToString("0") : "N/A")</span>
+        <span><strong>Case Weight:</strong> @(Model.AssemblyItem?.Custitemproduct_Spec_Casewtgrosskg != null ? $"{Model.AssemblyItem.Custitemproduct_Spec_Casewtgrosskg} KG" : "N/A")</span>
+    </div>
+
+    <!-- Table with Date / Product Code / Our Ref / Case Number -->
+    <table style="width:100%; border-collapse:collapse; border-top:2px solid #000; border-bottom:2px solid #000; margin-bottom:10px;">
+        <tr>
+            <td style="padding:4px; vertical-align:top;">
+                <div><strong>Date Produced:</strong><br />@Model.labelinfo.Create_Date</div>
+                <div style="margin-top:5px;"><strong>Our Ref:</strong><br />@(string.IsNullOrWhiteSpace(Model.AssemblyItem?.ItemId) ? "N/A" : Model.AssemblyItem?.ItemId)</div>
+                <div style="margin-top:5px;"><strong>Case Number:</strong><br />@Model.labelinfo.Label_No</div>
+            </td>
+            <td style="text-align:center; padding:4px;">
+                @if (!string.IsNullOrWhiteSpace(Model.AssemblyItem?.Custitem12))
+                {
+                    var paddedGtin = Model.AssemblyItem.Custitem12.PadLeft(13, '0');
+                    var readableCaseGtin = "(02)" + paddedGtin;
+                    <div>
+                        <svg id="gs1Barcode" style="height:40px; width:150px;"></svg>
+                        <script>
+                            JsBarcode("#gs1Barcode", "@paddedGtin", {
+                                format: "CODE128",
+                                lineColor: "#000",
+                                width: 1.5,
+                                height: 40,
+                                displayValue: true,
+                                fontSize: 9
+                            });
+                        </script>
+                        <div style="font-size:9px;">@readableCaseGtin</div>
+                    </div>
+                }
+            </td>
+            <td style="text-align:center; padding:4px;">
+                <img src="/images/22PAP.png" alt="22PAP" style="height:60px;" />
+            </td>
+        </tr>
+    </table>
+
+</div>

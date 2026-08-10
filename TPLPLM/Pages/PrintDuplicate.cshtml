@@ -1,0 +1,435 @@
+﻿@page
+@model TPLPLM.Pages.PrintDuplicateModel
+@{
+   
+}
+
+<head>
+    <style>
+        /* ✅ Modal Content */
+        #labelPreviewModal .modal-content {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            background: #f8f9fa;
+        }
+
+        /* ✅ Header */
+        #labelPreviewModal .modal-header {
+            background-color: #1f3a5f !important;
+            color: #ffffff !important;
+            border-bottom: none;
+            padding: 1rem 1.5rem;
+        }
+
+        #labelPreviewModal .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* ✅ Body */
+        #labelPreviewModal .modal-body {
+            padding: 1.5rem;
+            background: #ffffff;
+        }
+
+        /* ✅ Labels & selects */
+        .form-label {
+            font-weight: 600;
+            color: #1f3a5f;
+            margin-bottom: 0.35rem;
+        }
+
+        .form-select {
+            border-radius: 6px;
+            border: 1px solid #3b4f6b;
+            padding: 0.55rem 0.75rem;
+        }
+
+            .form-select:focus {
+                outline: none;
+                border-color: #1f3a5f;
+                box-shadow: 0 0 0 0.15rem rgba(31,58,95,0.25);
+            }
+
+        /* ✅ Preview container */
+        #labelPreviewContainer {
+            background: #e9eef6;
+            border: 1px solid #3b4f6b;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        /* ✅ Table styling */
+        .table {
+            border-radius: 6px;
+            overflow: hidden;
+            font-size: 0.875rem;
+        }
+
+            .table th {
+                background-color: #3b4f6b;
+                color: #ffffff;
+                font-weight: 600;
+                width: 35%;
+                word-wrap: break-word;
+                white-space: normal;
+            }
+
+            .table td {
+                background-color: #f5f8fb;
+                color: #1f3a5f;
+                padding: 0.65rem 1rem;
+                word-wrap: break-word;
+                white-space: normal;
+            }
+
+        /* ✅ Make table scrollable on small screens */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        /* ✅ Footer */
+        #labelPreviewModal .modal-footer {
+            background-color: #1f3a5f;
+            border-top: none;
+            padding: 1rem 1.5rem;
+        }
+
+        /* ✅ Button */
+        .btn-primary {
+            background-color: #3b4f6b !important;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 0.7rem;
+        }
+
+            .btn-primary:hover {
+                background-color: #1f3a5f !important;
+            }
+
+        /* ✅ Alerts */
+        .alert {
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        /* ✅ Fix incorrect @@media and add mobile responsiveness */
+        @@media (max-width: 576px) {
+            #labelPreviewModal .modal-dialog
+
+        {
+            max-width: 95% !important;
+            width: 95% !important;
+            margin: 0 auto;
+        }
+
+        #labelPreviewModal .modal-body {
+            max-height: 65vh !important;
+            padding: 1rem;
+        }
+
+        #labelPreviewContainer {
+            padding: 0.75rem;
+        }
+
+        .table {
+            font-size: 0.75rem;
+        }
+
+        }
+
+        @@media (min-width: 577px) {
+            #labelPreviewModal .modal-body
+
+        {
+            max-height: 60vh;
+        }
+
+        }
+    </style>
+
+</head>
+
+<!-- Modal -->
+<div class="modal fade" id="labelPreviewModal" tabindex="-1" aria-labelledby="labelPreviewModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-4 shadow-sm border-0">
+            <form method="post" id="printForm">
+
+                <div class="modal-header d-flex justify-content-between align-items-center">
+                    <h5 class="modal-title fw-semibold mb-0" id="labelPreviewModalLabel">Label Details</h5>
+                    <button type="button" class="btn-close btn-close-white" aria-label="Close" onclick="window.location.href = 'Index'"></button>
+                </div>
+
+                <div class="modal-body px-4 pb-0">
+
+                    <input type="hidden" asp-for="Address"
+                           value="Ty Dyffryn, Alder Avenue, Dyffryn Business Park, Ystrad Mynach, CF82 7TW" />
+
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger mt-2">@Model.ErrorMessage</div>
+                    }
+                    
+                    @{
+                        var defaultPrinter = Model.DefaultPrinter;
+                        var selectedTemplate = Model.SelectedLabelTemplate?.Trim();
+                        var labelType = Model.labelinfo?.Label_Type;
+
+                        // Auto-select KBA printer for KBA / CC
+                        if ((labelType == "KBA" || labelType == "CC") &&
+                        Model.AvailablePrinters.Contains("Brother - Production KBA"))
+                        {
+                            defaultPrinter = "Brother - Production KBA";
+                        }
+                    }
+
+                    @if (string.IsNullOrEmpty(selectedTemplate))
+                    {
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function () {
+                                alert("No label template is assigned to this assembly item.");
+                            });
+                        </script>
+                    }
+                    <!-- PRINTER SELECT -->
+                    <div class="mb-3">
+                        <label class="form-label">Select Printer</label>
+                        <select asp-for="SelectedPrinter" class="form-select" required>
+                            @foreach (var printer in Model.AvailablePrinters)
+                            {
+                                <option value="@printer" selected="@(printer == Model.DefaultPrinter)">
+                                    @printer
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- TEMPLATE SELECT -->
+                    <div class="mb-3">
+                        <label class="form-label">Select Label Template</label>
+                        <select asp-for="SelectedLabelTemplate" class="form-select" required>
+                            @foreach (var template in Model.LabelTemplates)
+                            {
+                                var isSelected = string.Equals(
+                                template?.Trim(),
+                                selectedTemplate,
+                                StringComparison.OrdinalIgnoreCase
+                                );
+
+                                <option value="@template" selected="@(isSelected ? "selected" : null)">
+                                    @template
+                                </option>
+                            }
+                           
+                        </select>
+                    </div>
+
+
+                    <!-- TABLE OF DETAILS -->
+                    <div class="table-responsive mt-3">
+                        <table class="table table-bordered table-striped align-middle">
+                            <tbody>
+
+                                <tr>
+                                    <th>Label Type</th>
+                                    <td>
+                                        <input asp-for="labelinfo.Label_Type" class="form-control" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Label Template</th>
+                                    <td>
+                                        <input asp-for="AssemblyItem.Custitemproduct_Spec_Label_Temp" class="form-control" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Work Order</th>
+                                    <td>
+                                        <input asp-for="labelinfo.Work_Order" class="form-control" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>GTIN</th>
+                                    <td>
+                                        <input asp-for="AssemblyItem.Custitemproduct_Spec_Gtin" class="form-control" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Item ID</th>
+                                    <td>
+                                        <input asp-for="AssemblyItem.ItemId" class="form-control" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Item Description</th>
+                                    <td>
+                                        <input asp-for="AssemblyItem.Description" class="form-control" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Customer SKU</th>
+                                    <td>
+                                        <input asp-for="AssemblyItem.Custitemproduct_Spec_Sku" class="form-control" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Customer</th>
+                                    <td>
+                                        <input asp-for="AssemblyItem.Custitem13" class="form-control" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Shipping Address</th>
+                                    <td>
+                                        <input asp-for="AssemblyItem.Custitemitem_Shipping_Address" class="form-control" />
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <th>Case Qty</th>
+                                    <td>
+                                        <input asp-for="AssemblyItem.Custitemproduct_Spec_Qtyperouter" class="form-control" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Cases/Pallet</th>
+                                    <td>
+                                        <input asp-for="AssemblyItem.Custitemproduct_Spec_Caseperpallet" class="form-control" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Pieces/Pallet</th>
+                                    <td>
+                                        <input asp-for="AssemblyItem.Custitemproduct_Spec_Qtyperpallet" class="form-control" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Net Case Weight</th>
+                                    <td>
+                                        <input asp-for="AssemblyItem.Custitemproduct_Spec_Casewtnet" class="form-control" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Gross Case Weight</th>
+                                    <td>
+                                        <input asp-for="AssemblyItem.Custitemproduct_Spec_Casewtgrosskg" class="form-control" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Pallet Net Weight</th>
+                                    <td>
+                                        <input asp-for="AssemblyItem.Custitemproduct_Spec_Palletwtnetkg" class="form-control" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Pallet Gross Weight</th>
+                                    <td>
+                                        <input asp-for="AssemblyItem.Custitemproduct_Spec_Palletwtgrosskg" class="form-control" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Label Quantity</th>
+                                    <td>
+                                        <input asp-for="labelinfo.Label_Qty" class="form-control" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Build Quantity</th>
+                                    <td>
+                                        <input asp-for="labelinfo.Build_Qty" class="form-control" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Last Label Number</th>
+                                    <td>
+                                        <input asp-for="labelinfo.Label_No" class="form-control" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Date Produced</th>
+                                    <td>
+                                        <input asp-for="labelinfo.Create_Date" class="form-control" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Best Before</th>
+                                    <td>
+                                        <input asp-for="labelinfo.Best_Before" class="form-control" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Expiry</th>
+                                    <td>
+                                        <input asp-for="labelinfo.Expiry" class="form-control" />
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer border-top-0 px-4 py-3">
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="bi bi-printer me-2"></i> Print Label
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- Show Modal Automatically -->
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        const modal = new bootstrap.Modal(document.getElementById('labelPreviewModal'), {
+            backdrop: 'static',
+            keyboard: false
+        });
+        modal.show();
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("printForm");
+        const loader = document.getElementById("globalLoader");
+
+        if (!form || !loader) return;
+
+        form.addEventListener("submit", function () {
+            loader.classList.remove("hide");
+
+            // Disable all submit buttons to prevent double-print
+            form.querySelectorAll("button[type='submit']").forEach(btn => {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Printing...';
+            });
+        });
+    });
+</script>
+

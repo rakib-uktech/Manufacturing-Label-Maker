@@ -1,0 +1,544 @@
+﻿@page
+@model TPLPLM.Pages.HelpModel
+
+@{
+    ViewData["Title"] = "Get Help";
+}
+
+<div class="container mt-5" id="helpManual">
+    <!-- Top Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Get Help</h2>
+        <button class="btn btn-outline-primary" onclick="window.print()">
+            🖨️ Print / Download Manual
+        </button>
+    </div>
+
+    <!-- Help Card -->
+    <div class="card shadow-sm rounded-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Get Help</h4>
+        </div>
+        <div class="card-body">
+            <p class="lead">Need assistance? We're here to help!</p>
+
+            <!-- Search Bar -->
+            <div class="mb-3">
+                <input type="text" class="form-control" id="searchInput" placeholder="Search help topics...">
+            </div>
+
+            <!-- Help Topics -->
+            <div class="accordion" id="helpAccordion">
+
+                <!-- Accessing Interface -->
+                <div class="accordion-item help-topic">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                            📍 Accessing the Create Label Interface
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            Navigate to the **Create Label** section in your application.
+                            You will see a form with several input fields categorized under:
+                            <ul>
+                                <li>Work Order</li>
+                                <li>Label Type</li>
+                                <li>Item No.</li>
+                                <li>Item Name</li>
+                                <li>Label Quantity</li>
+                                <li>(Optional) Build Quantity</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Field Descriptions -->
+                <div class="accordion-item help-topic">
+                    <h2 class="accordion-header" id="headingTwo">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                            🛠 Form Field Descriptions
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            <table class="table table-bordered table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Field</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><strong>Work Order</strong></td><td>Select a valid Work Order. Auto-fills related fields.</td></tr>
+                                    <tr><td><strong>Label Type</strong></td><td>Auto-filled. Can be changed. Options: Case, Pallet, SBUX, KBA, CC.</td></tr>
+                                    <tr><td><strong>Item No.</strong></td><td>Select a product number. Fills in Item Name.</td></tr>
+                                    <tr><td><strong>Item Name</strong></td><td>Select product description matching the item number.</td></tr>
+                                    <tr><td><strong>Label Qty</strong></td><td>Enter number of labels to print.</td></tr>
+                                    <tr><td><strong>Build Qty</strong></td><td>Only for Label Types KBA or CC.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Label Type Logic -->
+                <div class="accordion-item help-topic">
+                    <h2 class="accordion-header" id="headingThree">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                            🔍 Label Type Rules
+                        </button>
+                    </h2>
+                    <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            <table class="table table-bordered table-sm">
+                                <thead>
+                                    <tr><th>Condition</th><th>Label Type</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>Item No. starts with <code>FG</code> and Name includes <code>STARBUCKS</code></td><td>SBUX</td></tr>
+                                    <tr><td>Item No. starts with <code>KBA</code></td><td>KBA</td></tr>
+                                    <tr><td>Item No. starts with <code>CC</code></td><td>CC</td></tr>
+                                    <tr><td>Other cases</td><td>Case</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submitting the Form -->
+                <div class="accordion-item help-topic">
+                    <h2 class="accordion-header" id="headingFour">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
+                            ✅ Submitting the Form
+                        </button>
+                    </h2>
+                    <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            Once all required fields are filled:
+                            <ul>
+                                <li>Click <strong>Save</strong> (💾) to create the label.</li>
+                                <li>Click <strong>Close</strong> (❌) to exit without saving.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Validation Notes -->
+                <div class="accordion-item help-topic">
+                    <h2 class="accordion-header" id="headingFive">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive">
+                            ❗ Validation Notes
+                        </button>
+                    </h2>
+                    <div id="collapseFive" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            <ul>
+                                <li>Fields marked with a red asterisk (<span class="text-danger">*</span>) are required.</li>
+                                <li>Label and Build quantities must be valid integers.</li>
+                                <li>Internal ID is handled automatically.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Security -->
+                <div class="accordion-item help-topic">
+                    <h2 class="accordion-header" id="headingSix">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix">
+                            🔐 Data Security & Notes
+                        </button>
+                    </h2>
+                    <div id="collapseSix" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            <ul>
+                                <li>All data is securely submitted via <code>POST</code> with <code>multipart/form-data</code>.</li>
+                                <li>Build Qty only shows for KBA or CC labels.</li>
+                                <li>Avoid refreshing to prevent data loss.</li>
+                                <li>Contact your system administrator for technical issues.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Accordion: Edit Label -->
+            <div class="accordion mt-4" id="helpAccordion">
+
+                <div class="accordion-item help-topic">
+                    <h2 class="accordion-header" id="headingEditLabel">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEditLabel" aria-expanded="false" aria-controls="collapseEditLabel">
+                            📝 Edit Label – Field Guide & Submission
+                        </button>
+                    </h2>
+                    <div id="collapseEditLabel" class="accordion-collapse collapse" aria-labelledby="headingEditLabel" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            <p>This form allows you to <strong>edit an existing label</strong> by modifying the Label Type, Item information, and Quantity before submitting changes to the system.</p>
+
+                            <h6 class="mt-3">🔧 Editable Fields:</h6>
+                            <ul>
+                                <li>
+                                    <strong>Label Type</strong>
+                                    <ul>
+                                        <li>Use the dropdown or type to select a valid label type</li>
+                                        <li>Options are populated dynamically from the system</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <strong>Item No.</strong>
+                                    <ul>
+                                        <li>Enter or select the item number from suggestions</li>
+                                        <li>This corresponds to the product code in your database</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <strong>Item Name</strong>
+                                    <ul>
+                                        <li>Enter or select the corresponding product name</li>
+                                        <li>Must match existing records to ensure accuracy</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <strong>Qty (Label Quantity)</strong>
+                                    <ul>
+                                        <li>Enter the total number of labels required</li>
+                                        <li>This must be a positive numeric value</li>
+                                    </ul>
+                                </li>
+                            </ul>
+
+                            <h6 class="mt-3">⚠️ Validation:</h6>
+                            <ul>
+                                <li>All fields marked with <span class="text-danger">*</span> are mandatory</li>
+                                <li>Error messages (e.g., for Item Name) will be displayed below the field if input is invalid</li>
+                            </ul>
+
+                            <h6 class="mt-3">✅ Actions:</h6>
+                            <ul>
+                                <li>
+                                    <strong>Submit</strong> – Saves the updated label details. You'll be redirected or notified based on success/failure
+                                </li>
+                                <li>
+                                    <strong>Cancel</strong> – Discards changes and returns to the main label listing screen
+                                </li>
+                            </ul>
+
+                            <h6 class="mt-3">💡 Tips:</h6>
+                            <ul>
+                                <li>Use the autocomplete functionality in each input field for faster entry</li>
+                                <li>Ensure that label types and items exist in your master lists to avoid submission errors</li>
+                                <li>Use the same Item No. and Item Name pair to maintain data consistency</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Accordion: Top Card Section Help -->
+            <div class="accordion mt-4" id="helpAccordion">
+                <div class="accordion-item help-topic">
+                    <h2 class="accordion-header" id="headingCardManual">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCardManual" aria-expanded="false" aria-controls="collapseCardManual">
+                            📘 Top Card Section – Label Counts & Copy
+                        </button>
+                    </h2>
+                    <div id="collapseCardManual" class="accordion-collapse collapse" aria-labelledby="headingCardManual" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            <p>This section shows current label counts for:</p>
+                            <ul>
+                                <li><strong>Case</strong> – 📦 Blue card</li>
+                                <li><strong>Pallet</strong> – 🛒 Green card</li>
+                                <li><strong>SBUX</strong> – ☕ Dark card</li>
+                                <li><strong>KBA</strong> – 🖨️ Cyan card</li>
+                                <li><strong>C&C</strong> – ✂️ Yellow card</li>
+                            </ul>
+
+                            <p>Each card displays a live count (from the system model) and allows you to:</p>
+                            <ul>
+                                <li><strong>Click the card</strong> to copy the label count</li>
+                                <li><strong>Receive a confirmation alert</strong> (e.g., “Copied: 12”)</li>
+                            </ul>
+
+                            <h6 class="mt-3">🔧 How It Works</h6>
+                            <ul>
+                                <li>Counts are populated via Razor:</li>
+                                <li>Each card calls a function</li>
+                                <li>Function uses to copy the number </li>
+                            </ul>
+
+                            <h6 class="mt-3">💡 Tips</h6>
+                            <ul>
+                                <li>Scroll sideways on small screens to view all cards</li>
+                                <li>If a count is missing, a warning will appear</li>
+                                <li>This section helps streamline reporting & label handling</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Accordion: Label List Table -->
+            <div class="accordion mt-4" id="helpAccordion">
+
+                <div class="accordion-item help-topic">
+                    <h2 class="accordion-header" id="headingLabelTable">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLabelTable" aria-expanded="false" aria-controls="collapseLabelTable">
+                            🧾 Label List Table – Actions & Navigation
+                        </button>
+                    </h2>
+                    <div id="collapseLabelTable" class="accordion-collapse collapse" aria-labelledby="headingLabelTable" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            <p>This section displays all label records organized into tabbed tables:</p>
+                            <ul>
+                                <li><strong>Case</strong></li>
+                                <li><strong>Pallet</strong></li>
+                                <li><strong>KBA</strong></li>
+                                <li><strong>SBUX Case</strong></li>
+                                <li><strong>Cut & Crease</strong></li>
+                            </ul>
+
+                            <h6 class="mt-3">📌 Table Columns:</h6>
+                            <ul>
+                                <li><strong>ID</strong> – Unique identifier with print shortcut</li>
+                                <li><strong>W/O No.</strong> – Work Order Number</li>
+                                <li><strong>Date</strong> – Creation timestamp</li>
+                                <li><strong>Product</strong> – Item code</li>
+                                <li><strong>Description</strong> – Product details</li>
+                                <li><strong>Type</strong> – Label category</li>
+                                <li><strong>Qty</strong> – Number of labels</li>
+                                <li><strong>Reference</strong> – Custom label reference or sheet count</li>
+                                <li><strong>Action</strong> – Manage label (Edit, Download, Print)</li>
+                            </ul>
+
+                            <h6 class="mt-3">⚙️ Actions (Dropdown Menu):</h6>
+                            <ul>
+                                <li><strong>Edit</strong> – Modify label details</li>
+                                <li><strong>Download Label</strong> – Save label as PDF</li>
+                                <li><strong>Print Label</strong> – Print directly from browser</li>
+                            </ul>
+
+                            <h6 class="mt-3">🔍 Search & Export:</h6>
+                            <ul>
+                                <li><strong>Global Search</strong> – Use the search box at the top of the page to filter results across all tables</li>
+                                <li>
+                                    <strong>Export Options</strong> – Use icons above each table to:
+                                    <ul>
+                                        <li><i class="fas fa-copy"></i> Copy table data</li>
+                                        <li><i class="fas fa-file-excel"></i> Export to Excel</li>
+                                        <li><i class="fas fa-file-pdf"></i> Export to PDF</li>
+                                        <li><i class="fas fa-print"></i> Print current table</li>
+                                    </ul>
+                                </li>
+                            </ul>
+
+                            <h6 class="mt-3">↕️ Sorting & Paging:</h6>
+                            <ul>
+                                <li>All tables are sortable (default: newest first by ID)</li>
+                                <li>Pagination is enabled by default</li>
+                                <li>Click any column header to sort by that column</li>
+                            </ul>
+
+                            <h6 class="mt-3">🗂️ Tab Behavior:</h6>
+                            <ul>
+                                <li>Switch between label types using the tab headers</li>
+                                <li>Tables auto-adjust when their tab becomes active</li>
+                                <li>Default tab: <strong>Case</strong></li>
+                            </ul>
+
+                            <h6 class="mt-3">📄 Technical Note:</h6>
+                            <ul>
+                                <li>DataTables are initialized with jQuery for enhanced interactivity</li>
+                                <li>Settings like export, sort, paging, and responsive layout are shared across all label tables</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Accordion: Print Label -->
+            <div class="accordion mt-4" id="helpAccordion">
+
+                <div class="accordion-item help-topic">
+                    <h2 class="accordion-header" id="headingPrintLabel">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePrintLabel" aria-expanded="false" aria-controls="collapsePrintLabel">
+                            🖨️ Print Label – Preview & Print Guide
+                        </button>
+                    </h2>
+                    <div id="collapsePrintLabel" class="accordion-collapse collapse" aria-labelledby="headingPrintLabel" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            <p>This feature allows you to preview and print product labels with all necessary case-level or item-level details.</p>
+
+                            <h6 class="mt-3">🧾 Label Details Modal:</h6>
+                            <ul>
+                                <li>The modal opens when printing a label</li>
+                                <li>It displays key information about the selected label and related product item</li>
+                                <li>The modal is non-dismissible via keyboard or backdrop (to prevent accidental closure)</li>
+                            </ul>
+
+                            <h6 class="mt-3">🖨️ Printer Selection:</h6>
+                            <ul>
+                                <li>Select a printer from the dropdown list</li>
+                                <li>The default printer is preselected automatically</li>
+                                <li>If the label type is <strong>KBA</strong> or <strong>CC</strong> and “Brother - Production KBA” is available, it will be selected by default</li>
+                                <li>This ensures labels route to the appropriate production printer</li>
+                            </ul>
+
+                            <h6 class="mt-3">📋 Label Information Displayed:</h6>
+                            <ul>
+                                <li><strong>Label Type</strong> – e.g., Case, KBA, CC</li>
+                                <li><strong>Work Order Number</strong></li>
+                                <li><strong>GTIN</strong> – Global Trade Item Number</li>
+                                <li><strong>Item Code & Description</strong></li>
+                                <li><strong>Customer SKU</strong> & <strong>Customer</strong></li>
+                                <li><strong>Case Qty</strong> & <strong>Weight</strong></li>
+                                <li><strong>Label Quantity</strong> & <strong>Build Quantity</strong></li>
+                                <li><strong>Last Label Number</strong></li>
+                                <li><strong>Date Produced</strong>, <strong>Best Before</strong>, <strong>Expiry</strong></li>
+                            </ul>
+
+                            <h6 class="mt-3">📌 Additional Info:</h6>
+                            <ul>
+                                <li>The form includes a hidden shipping address field</li>
+                                <li>If no item data is found, an info message is displayed</li>
+                            </ul>
+
+                            <h6 class="mt-3">🖨️ Print Action:</h6>
+                            <ul>
+                                <li>Click the <strong>“Print Label”</strong> button at the bottom of the modal</li>
+                                <li>Form is submitted to trigger label printing through your configured print service</li>
+                                <li>The selected printer and label info are passed along securely</li>
+                            </ul>
+
+                            <h6 class="mt-3">❌ Closing the Modal:</h6>
+                            <ul>
+                                <li>Use the <strong>“X”</strong> button in the top right to exit the modal</li>
+                                <li>This redirects back to the Index page</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Accordion: Print or Download Label -->
+            <div class="accordion mt-4" id="helpAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingDownloadLabel">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDownloadLabel" aria-expanded="false" aria-controls="collapseDownloadLabel">
+                            🖨️ Print or Download Label – User Guide
+                        </button>
+                    </h2>
+                    <div id="collapseDownloadLabel" class="accordion-collapse collapse" aria-labelledby="headingDownloadLabel" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body">
+                            <p>This section allows users to <strong>generate, download, or print product labels</strong> based on label type, item information, and configuration settings.</p>
+
+                            <h6 class="mt-3">🧾 Label Details Preview Table:</h6>
+                            <ul>
+                                <li>
+                                    The preview table shows key product and label information, including:
+                                    <ul>
+                                        <li><strong>Label Type</strong></li>
+                                        <li><strong>GTIN, Item Code, Description</strong></li>
+                                        <li><strong>Customer SKU, Customer</strong></li>
+                                        <li><strong>Case Qty, Weight</strong></li>
+                                        <li><strong>Label Qty, Date, Expiry</strong></li>
+                                    </ul>
+                                </li>
+                                <li>Each row includes a toggle switch (future use: possibly to enable/disable fields on label).</li>
+                            </ul>
+
+                            <h6 class="mt-3">🖨️ Print / 📥 Download Options:</h6>
+                            <ul>
+                                <li>
+                                    Click the <strong>“Print”</strong> button to start the label generation process.
+                                </li>
+                                <li>
+                                    A prompt will appear asking: <br>
+                                    <code>Do you want to download the label as a PDF? Click 'Cancel' to print directly.</code>
+                                </li>
+                                <li>
+                                    <strong>Click “OK”</strong> – downloads the label as a high-resolution PDF file<br>
+                                    <strong>Click “Cancel”</strong> – opens the label PDF in a new browser tab and automatically triggers the print dialog
+                                </li>
+                            </ul>
+
+                            <h6 class="mt-3">📐 Label Size:</h6>
+                            <ul>
+                                <li>
+                                    Label dimensions are set based on the selected <strong>Label Type</strong>:
+                                    <ul>
+                                        <li><strong>Case</strong>: 4 x 6 inches</li>
+                                        <li><strong>Pallet</strong>: 6 x 8 inches</li>
+                                    </ul>
+                                </li>
+                                <li>Ensure the correct label type is selected before clicking “Print”</li>
+                            </ul>
+
+                            <h6 class="mt-3">⏳ Notes:</h6>
+                            <ul>
+                                <li>A loading overlay is shown while the label is being prepared</li>
+                                <li>High-resolution rendering ensures the label is print-ready (via html2pdf.js)</li>
+                                <li>Internet browser pop-up blockers may need to be disabled to allow PDF preview</li>
+                            </ul>
+
+                            <h6 class="mt-3">🔁 After Completion:</h6>
+                            <ul>
+                                <li>Once complete, the loader disappears and the print/download button becomes active again</li>
+                                <li>You may print multiple times if needed</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Optional Print Styles -->
+<style>
+    @@media print {
+        body *
+
+    {
+        visibility: hidden;
+    }
+
+    #helpManual, #helpManual * {
+        visibility: visible;
+    }
+
+    #helpManual {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+
+    button {
+        display: none !important;
+    }
+
+    .accordion-button::after {
+        display: none !important;
+    }
+
+    .accordion-collapse {
+        display: block !important;
+    }
+
+    .accordion-button.collapsed {
+        background-color: #f8f9fa !important;
+    }
+
+    }
+</style>
+
+
+<!-- JS for Search Filter -->
+<script>
+    document.getElementById('searchInput').addEventListener('keyup', function () {
+        const filter = this.value.toLowerCase();
+        const items = document.querySelectorAll('.help-topic');
+        items.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = text.includes(filter) ? '' : 'none';
+        });
+    });
+</script>

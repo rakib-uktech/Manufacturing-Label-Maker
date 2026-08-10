@@ -1,0 +1,119 @@
+﻿@page
+@model TPLPLM.Pages.WorkOrderCompletionModel
+@{
+}
+<!-- Modal -->
+<div class="modal fade" id="wocModal" tabindex="-1" aria-labelledby="wocModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" id="woc-form" onsubmit="handleWocSubmit(event)">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="wocModalLabel">Complete Work Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="WOC_WorkOrder" class="form-label">Work Order <span class="text-danger">*</span></label>
+                        <input class="form-control" list="WOC_WorkOrderOptions" id="WOC_WorkOrder" name="WorkOrder" required>
+                        <datalist id="WOC_WorkOrderOptions">
+                            @foreach (var wo in Model.Productlist)
+                            {
+                                <option value="@wo.Ref_No">@wo.Ref_No</option>
+                            }
+                        </datalist>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="WOC_AssemblyItem">Item No. <span class="text-danger">*</span></label>
+                        <input class="form-control" id="WOC_AssemblyItem" name="AssemblyItem" readonly>
+                    </div>
+
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Completion Qty <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="WOC_CompletionQty" name="CompletionQty" min="1" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Memo</label>
+                        <textarea class="form-control" id="WOC_Memo" name="Memo" rows="2" placeholder="Optional remarks..."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle me-2"></i>Complete
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-square me-2"></i>Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Serialize and expose product list
+        const productList = @Html.Raw(Json.Serialize(Model.Productlist));
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const modalElement = document.getElementById('wocModal');
+            const workOrderInput = document.getElementById('WOC_WorkOrder');
+            const assemblyItemInput = document.getElementById('WOC_AssemblyItem');
+            const form = document.getElementById('woc-form');
+
+            // Initialize and show modal
+            const modal = new bootstrap.Modal(modalElement, {
+                backdrop: 'static',
+                keyboard: false
+            });
+            modal.show();
+
+            // Lookup Assembly Item when Work Order changes
+            workOrderInput.addEventListener('change', function () {
+                const selectedWo = workOrderInput.value.trim();
+                const item = productList.find(p => p.Ref_No === selectedWo);
+                assemblyItemInput.value = item ? item.Product : ''; // or item.Description if preferred
+            });
+
+            // Optional manual open function
+            window.openWocModal = function () {
+                form.reset();
+                assemblyItemInput.value = '';
+                modal.show();
+            };
+
+            // Handle form submission
+            window.handleWocSubmit = function (event) {
+                event.preventDefault();
+
+                const formData = new FormData(form);
+
+                fetch('@Url.Page("WorkOrderCompletion")', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => {
+                    if (res.ok) {
+                        modal.hide();
+                        location.reload();
+                    } else {
+                        alert("Failed to complete work order.");
+                    }
+                })
+                .catch(err => {
+                    console.error("Submission error:", err);
+                    alert("An error occurred.");
+                });
+            };
+        });
+    </script>
+}
+
+

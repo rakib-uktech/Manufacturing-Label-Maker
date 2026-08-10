@@ -1,0 +1,402 @@
+﻿@page
+@model TPLPLM.Pages.PrintModel
+
+@{
+}
+<head>
+    <style>
+        /* ✅ Modal Content */
+        #labelPreviewModal .modal-content {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            background: #f8f9fa;
+        }
+
+        /* ✅ Header */
+        #labelPreviewModal .modal-header {
+            background-color: #1f3a5f !important;
+            color: #ffffff !important;
+            border-bottom: none;
+            padding: 1rem 1.5rem;
+        }
+
+        #labelPreviewModal .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* ✅ Body */
+        #labelPreviewModal .modal-body {
+            padding: 1.5rem;
+            background: #ffffff;
+        }
+
+        /* ✅ Labels & selects */
+        .form-label {
+            font-weight: 600;
+            color: #1f3a5f;
+            margin-bottom: 0.35rem;
+        }
+
+        .form-select {
+            border-radius: 6px;
+            border: 1px solid #3b4f6b;
+            padding: 0.55rem 0.75rem;
+        }
+
+            .form-select:focus {
+                outline: none;
+                border-color: #1f3a5f;
+                box-shadow: 0 0 0 0.15rem rgba(31,58,95,0.25);
+            }
+
+        /* ✅ Preview container */
+       /*  #labelPreviewContainer {
+            background: #e9eef6;
+            border: 1px solid #3b4f6b;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            max-width: 100%;
+            overflow-x: auto;
+        } */
+
+        /* ✅ Table styling */
+        .table {
+            border-radius: 6px;
+            overflow: hidden;
+            font-size: 0.875rem;
+        }
+
+            .table th {
+                background-color: #3b4f6b;
+                color: #ffffff;
+                font-weight: 600;
+                width: 35%;
+                word-wrap: break-word;
+                white-space: normal;
+            }
+
+            .table td {
+                background-color: #f5f8fb;
+                color: #1f3a5f;
+                padding: 0.65rem 1rem;
+                word-wrap: break-word;
+                white-space: normal;
+            }
+
+        /* ✅ Make table scrollable on small screens */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        /* ✅ Footer */
+        #labelPreviewModal .modal-footer {
+            background-color: #1f3a5f;
+            border-top: none;
+            padding: 1rem 1.5rem;
+        }
+
+        /* ✅ Button */
+        .btn-primary {
+            background-color: #3b4f6b !important;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 0.7rem;
+        }
+
+            .btn-primary:hover {
+                background-color: #1f3a5f !important;
+            }
+
+        /* ✅ Alerts */
+        .alert {
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        /* ✅ Fix incorrect @@media and add mobile responsiveness */
+        @@media (max-width: 576px) {
+            #labelPreviewModal .modal-dialog
+
+        {
+            max-width: 95% !important;
+            width: 95% !important;
+            margin: 0 auto;
+        }
+
+        #labelPreviewModal .modal-body {
+            max-height: 65vh !important;
+            padding: 1rem;
+        }
+
+       /*  #labelPreviewContainer {
+            padding: 0.75rem;
+        } */
+
+        .table {
+            font-size: 0.75rem;
+        }
+
+        }
+
+        @@media (min-width: 577px) {
+            #labelPreviewModal .modal-body
+
+        {
+            max-height: 60vh;
+        }
+
+        }
+    </style>
+
+</head>
+
+<!-- Modal -->
+<div class="modal fade" id="labelPreviewModal" tabindex="-1" aria-labelledby="labelPreviewModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-4 shadow-sm border-0">
+            <form method="post" id="printForm">
+                @Html.AntiForgeryToken()
+                <!-- Header -->
+                <div class="modal-header d-flex justify-content-between align-items-center">
+                    <h5 class="modal-title fw-semibold mb-0" id="labelPreviewModalLabel">Label Details</h5>
+                    <button type="button" class="btn-close btn-close-white" aria-label="Close" onclick="window.location.href = 'Index'"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body px-4 pb-0">
+                    <input type="hidden" asp-for="Address" value="Ty Dyffryn, Alder Avenue, Dyffryn Business Park, Ystrad Mynach, CF82 7TW" />
+
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger mt-2">@Model.ErrorMessage</div>
+                    }
+
+                    @{
+                        var defaultPrinter = Model.DefaultPrinter;
+                        var selectedTemplate = Model.SelectedLabelTemplate?.Trim();
+                        var labelType = Model.labelinfo?.Label_Type;
+
+                        // Auto-select KBA printer for KBA / CC
+                        if ((labelType == "KBA" || labelType == "CC") &&
+                        Model.AvailablePrinters.Contains("Brother - Production KBA"))
+                        {
+                            defaultPrinter = "Brother - Production KBA";
+                        }
+                    }
+
+                    @if (string.IsNullOrEmpty(selectedTemplate))
+                    {
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function () {
+                                alert("No label template is assigned to this assembly item.");
+                            });
+                        </script>
+                    }
+
+                    <div class="mb-3">
+                        <label for="printerSelect" class="form-label">Select Printer</label>
+                        <select id="printerSelect" name="SelectedPrinter" class="form-select" required>
+                            @foreach (var printer in Model.AvailablePrinters)
+                            {
+                                var selected = printer == defaultPrinter ? "selected" : null;
+                                <option value="@printer" selected="@selected">@printer</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="labelTemplateSelect" class="form-label">Select Label Template</label>
+                        <select id="labelTemplateSelect" name="SelectedLabelTemplate" class="form-select" required>
+                            @foreach (var template in Model.LabelTemplates)
+                            {
+                                var isSelected = string.Equals(
+                                template?.Trim(),
+                                selectedTemplate,
+                                StringComparison.OrdinalIgnoreCase
+                                );
+
+                                <option value="@template" selected="@(isSelected ? "selected" : null)">
+                                    @template
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    @if (Model.labelinfo?.Label_Type == "Shipping")
+                    {
+                        <div class="table-responsive mt-3">
+                            <table class="table table-bordered table-striped align-middle">
+                                <tbody>
+                                    <tr>
+                                        <th>Label Type</th>
+                                        <td>@Model.labelinfo.Label_Type</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Label Template</th>
+                                        <td>Shipping Label</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Sales Order</th>
+                                        <td>@Model.labelinfo.Work_Order</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Label Quantity</th>
+                                        <td>@Model.labelinfo.Label_Qty</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Last Label Number</th>
+                                        <td>@Model.labelinfo.Label_No</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Date</th>
+                                        <td>@Model.labelinfo.Create_Date</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Ship To</th>
+                                        <td style="white-space: pre-line;">
+                                            @Model.labelinfo.Comment
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>From</th>
+                                        <td>
+                                            Ty Dyffryn<br />
+                                            Alder Avenue<br />
+                                            Dyffryn Business Park<br />
+                                            Ystrad Mynach<br />
+                                            CF82 7TW
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else if (Model.AssemblyItem != null)
+                    {
+                        <div class="table-responsive mt-3">
+                            <table class="table table-bordered table-striped align-middle">
+                                <tbody>
+                                    <tr><th>Label Type</th><td>@Model.labelinfo.Label_Type</td></tr>
+                                    <tr><th>Label Template</th><td>@Model.AssemblyItem.Custitemproduct_Spec_Label_Temp</td></tr>
+                                    <tr><th>W/O No.</th><td>@Model.labelinfo.Work_Order</td></tr>
+                                    <tr><th>Case GTIN</th><td>(02)@Model.AssemblyItem.Custitemproduct_Spec_Gtin</td></tr>
+                                    <tr><th>Item Code</th><td>@Model.AssemblyItem.ItemId</td></tr>
+                                    <tr><th>Item Description</th><td>@Model.AssemblyItem.DisplayName</td></tr>
+                                    <tr><th>Customer Reference</th><td>@Model.AssemblyItem.Custitemproduct_Spec_Sku</td></tr>
+                                    <tr><th>Customer</th><td>@Model.AssemblyItem.Custitem13</td></tr>
+                                    <tr><th>Case Qty</th><td>@Model.AssemblyItem.Custitemproduct_Spec_Qtyperouter</td></tr>
+                                    <tr><th>Case Weight</th><td>@Model.AssemblyItem.Custitemproduct_Spec_Casewtgrosskg KG</td></tr>
+                                    <tr><th>Label Quantity</th><td>@Model.labelinfo.Label_Qty</td></tr>
+                                    <tr><th>Build Quantity</th><td>@Model.labelinfo.Build_Qty</td></tr>
+                                    <tr><th>Last Label Number</th><td>@Model.labelinfo.Label_No</td></tr>
+                                    <tr><th>Date Produced</th><td>@Model.labelinfo.Create_Date</td></tr>
+                                    <tr><th>Best Before</th><td>@Model.labelinfo.Best_Before</td></tr>
+                                    <tr><th>Expiry</th><td>(15)@Model.labelinfo.Expiry</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info mt-3">
+                            No data available.
+                        </div>
+                    }
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer border-top-0 px-4 py-3">
+                    <button type="submit" class="btn btn-primary btn-lg flex-fill">
+                        <i class="bi bi-printer me-2"></i> Print Label
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-danger btn-lg ms-2"
+                            id="btnCancelPrint">
+                        <i class="bi bi-x-circle me-2"></i> Cancel Print
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Show Modal Automatically -->
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        const modal = new bootstrap.Modal(document.getElementById('labelPreviewModal'), {
+            backdrop: 'static',
+            keyboard: false
+        });
+        modal.show();
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("printForm");
+        const loader = document.getElementById("globalLoader");
+
+        if (!form || !loader) return;
+
+        form.addEventListener("submit", function () {
+            loader.classList.remove("hide");
+
+            // Disable all submit buttons to prevent double-print
+            form.querySelectorAll("button[type='submit']").forEach(btn => {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Printing...';
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        document.getElementById("btnCancelPrint").addEventListener("click", function () {
+
+            const printer = document.getElementById("printerSelect").value;
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]');
+
+            fetch("?handler=CancelPrint", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    ...(token ? {
+                        "RequestVerificationToken": token.value
+                    } : {})
+                },
+                body: "selectedPrinter=" + encodeURIComponent(printer)
+            })
+            .then(response => response.json())
+            .then(data => {
+
+                if (data.success) {
+                    alert(data.message);
+                }
+                else {
+                    alert("Error : " + data.message);
+                }
+
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Failed to cancel print job.");
+            });
+
+        });
+
+    });
+</script>

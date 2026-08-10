@@ -1,0 +1,252 @@
+﻿@page
+@model Label_EditModel
+@{
+}
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Show the modal when the page loads
+            $("#editLabelModal").modal('show');
+        });
+    </script>
+    <style>
+        .custom-input {
+            border: 2px solid #007bff; /* Blue border color */
+            border-top: 0;
+            border-left: 0;
+            border-right: 0;
+            padding: 5px;
+            outline: none;
+            transition: border-color 0.3s ease-in-out;
+        }
+
+            .custom-input:focus {
+                border-color: #0056b3; /* Slightly darker blue for focus */
+            }
+
+    </style>
+</head>
+
+<body>
+    <!-- Modal -->
+    <div class="modal fade" id="editLabelModal" tabindex="-1" role="dialog" aria-labelledby="editLabelModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document" style="max-width: 500px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="w-100 text-center position-relative">
+                        <h5 class="modal-title" id="editLabelModalLabel">Edit Label</h5>
+                    </div>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="position: absolute; right: 15px;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body">
+
+                        <div class="table-grid">
+                            <section>
+                                <div class="row d-flex justify-content-center">
+                                <form method="POST">
+                                    <div class="row justify-content-center">
+
+                                        <div class="row justify-content-center text-center Border rounded-2">
+
+                                            <div id="results">
+
+
+                                               
+                                               
+                                                    <div class="row justify-content-between text-left">
+                                                        <div class="form-group col-sm-12 flex-column d-flex">
+                                                            <label class="form-control-label px-3">Label Type<span class="text-danger"> *</span></label>
+                                                            <input class="custom-input"
+                                                                    list="LabelTypeOptions" id="LabelType" name="LabelType" value="@Model.labelinfo.Label_Type" placeholder="">
+                                                            <datalist id="LabelTypeOptions">
+                                                                @foreach (var typeList in Model.LabelTypelist)
+                                                                {
+                                                                    <option value="@typeList.Label_Type">@typeList.Label_Type</option>
+                                                                }
+                                                            </datalist>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row justify-content-between text-left">
+                                                        <div class="form-group col-sm-12 flex-column d-flex">
+                                                            <label class="form-control-label px-3">Item No.<span class="text-danger"> *</span></label>
+                                                            <input class="custom-input"
+                                                                    list="Item_NolistOptions" id="Item_No" name="Item_No" value="@Model.labelinfo.Product" placeholder="Enter Item No." aria-describedby="basic-addon2">
+                                                            <datalist id="Item_NolistOptions">
+                                                                @foreach (var Item_Nolist in Model.Productlist)
+                                                                {
+                                                                    <option value="@Item_Nolist.Product">@Item_Nolist.Product</option>
+                                                                }
+                                                            </datalist>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row justify-content-between text-left">
+                                                        <div class="form-group col-sm-12 flex-column d-flex">
+                                                            <label class="form-control-label px-3">Item Name<span class="text-danger"> *</span></label>
+                                                            <input class="custom-input"
+                                                                    list="Item_NamelistOptions" id="Item_Name" name="Item_Name" value="@Model.labelinfo.Description" placeholder="Enter Item Name">
+                                                            <datalist id="Item_NamelistOptions">
+                                                                @foreach (var Item_Namelist in Model.Descriptionlist)
+                                                                {
+                                                                    <option value="@Item_Namelist.Description">@Item_Namelist.Description</option>
+                                                                }
+                                                            </datalist>
+                                                            <small id="item_nameError" class="form-text text-danger"></small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row justify-content-between text-left">
+                                                        <div class="form-group col-sm-12 flex-column d-flex">
+                                                            <label class="form-control-label px-3">Qty<span class="text-danger"> *</span></label>
+                                                            <input type="number" class="custom-input"
+                                                                    name="Label_Qty" id="Label_Qty" value="@Model.labelinfo.Label_Qty">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row justify-content-between text-left">
+                                                        <div class="form-group col-sm-12 flex-column d-flex">
+                                                            <label class="form-control-label px-3">
+                                                                Comment
+                                                            </label>
+                                                            <textarea class="custom-input"
+                                                                      id="Comment"
+                                                                      name="Comment"
+                                                                      rows="3"
+                                                                      placeholder="Optional comment...">@Model.labelinfo.Comment</textarea>
+                                                        </div>
+                                                    </div>
+
+
+                                                    <div class="modal-footer d-flex justify-content-center">
+                                                    </div>
+
+                                                    <div class="row justify-content-center text-center">
+                                                        <div class="form-group col-sm-6 flex-column d-flex">
+                                                            <button type="submit" class="btn btn-success bi bi-floppy mx-2">Submit</button>
+                                                        </div>
+                                                        <div class="form-group col-sm-6 flex-column d-flex">
+                                                            <a class="btn btn-danger bi-x-square" href='Index' role="button">Cancel</a>
+                                                        </div>
+                                                    </div>
+
+                                             
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </form>
+
+                            </section>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+@section Scripts {
+
+    <script>
+        // Automatically update Item Name when Item No changes
+        document.getElementById("Item_No").addEventListener("change", function () {
+            var itemNo = this.value;
+            if (itemNo) {
+                $.ajax({
+                    url: '@Url.Page("Search")',
+                    type: 'get',
+                    data: { SearchName: itemNo },
+                    success: function (data) {
+                        var itemName = $(data).find('#Item_Name').val();
+                        if (itemName) {
+                            document.getElementById("Item_Name").value = itemName;
+                        }
+                        else {
+                            document.getElementById("Item_Name").value = "";
+                            alert("No item found for the entered Item No.");
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+    <script>
+            document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('modal-form');
+
+            form.addEventListener('submit', function (event) {
+                let isValid = true;
+
+                // Clear all previous error messages
+                clearAllErrors();
+
+                // Validate Label Type
+                const labelType = document.getElementById('LabelType');
+                if (!labelType.value.trim()) {
+                    displayError(labelType, 'Please select a label type.');
+                    isValid = false;
+                }
+
+                // Validate Item No
+                const itemNos = document.querySelectorAll('input[name="Item_No"]');
+                itemNos.forEach(itemNo => {
+                    if (!itemNo.value.trim()) {
+                        displayError(itemNo, 'Please enter an item number.');
+                        isValid = false;
+                    }
+                });
+
+                // Validate Item Name
+                const itemNames = document.querySelectorAll('input[name="Item_Name"]');
+                itemNames.forEach(itemName => {
+                    if (!itemName.value.trim()) {
+                        displayError(itemName, 'Item Name is required.');
+                        isValid = false;
+                    }
+                });
+
+                // Validate Qty
+                const qtyInputs = document.querySelectorAll('input[name="Label_Qty"]');
+                qtyInputs.forEach(qtyInput => {
+                    if (!qtyInput.value.trim() || isNaN(qtyInput.value) || Number(qtyInput.value) <= 0) {
+                        displayError(qtyInput, 'Quantity must be a valid non-negative and non-zero number.');
+                        isValid = false;
+                    }
+                });
+
+                // Prevent form submission if validation fails
+                if (!isValid) {
+                    event.preventDefault();
+                }
+            });
+
+            // Function to display an error message for an input field
+            function displayError(inputElement, message) {
+                let errorElement = inputElement.nextElementSibling;
+                if (!errorElement || !errorElement.classList.contains('form-text')) {
+                    errorElement = document.createElement('small');
+                    errorElement.classList.add('form-text', 'text-danger');
+                    inputElement.parentNode.appendChild(errorElement);
+                }
+                errorElement.textContent = message;
+            }
+
+            // Function to clear all previous error messages
+            function clearAllErrors() {
+                const errorMessages = document.querySelectorAll('.form-text.text-danger');
+                errorMessages.forEach(error => error.remove());
+            }
+        });
+
+    </script>
+
+}

@@ -1,0 +1,830 @@
+﻿@page
+@model Label_PrintModel
+@{
+}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script>
+        $(document).ready(function () {
+            $("#myModal").modal('show');
+        });
+    </script>
+    
+        <!-- put any fonts you need here -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <!-- get the HTML to PDF bundle -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.min.js"></script>
+        <script src="https://cdn.tryretool.com/js/react.production.min.js" crossorigin></script>
+        <script src="https://cdn.tryretool.com/js/react-dom.production.min.js" crossorigin></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/jsbarcode/dist/JsBarcode.all.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/jsbarcode"></script>
+    <!-- Include Bootstrap Toggle Switch CSS & JS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Add Bootstrap if not included already -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+   
+        <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.min.js"></script>
+
+    <style>
+        #qrcode-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+    </style>
+
+
+    <style>
+        /* Custom styling for POS screen */
+       
+
+        .card-body {
+            text-align: center;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .card-text {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary i {
+            padding-right: 5px;
+            font-size: 1.1rem; /* Adjust icon size */
+        }
+
+        .custom-input {
+            border: 2px solid #007bff; /* Blue border color */
+            border-top: 0;
+            border-left: 0;
+            border-right: 0;
+            padding: 5px;
+            outline: none;
+            transition: border-color 0.3s ease-in-out;
+        }
+
+            .custom-input:focus {
+                border-color: #0056b3; /* Slightly darker blue for focus */
+            }
+    </style>
+    <style>
+        /* Style for the loading overlay */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7); /* Dark background */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            display: none; /* Initially hidden */
+            z-index: 1000;
+        }
+
+        /* Spinner animation */
+        .spinner {
+            border: 6px solid rgba(255, 255, 255, 0.3);
+            border-top: 6px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+
+        @@keyframes spin {
+            0% {transform: rotate(0deg);}
+            100% {
+            transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="loadingOverlay">
+    <div class="spinner"></div>
+    Generating Label, please wait...
+</div>
+  
+<div class="container-fluid px-3 py-4 mx-auto" style="height: 100vh;">
+    <div class="row d-flex justify-content-center align-items-center">
+        <div class="col-xl-6 col-lg-8 col-md-10 col-sm-12">
+            <div class="card shadow-lg border-0 rounded-3">
+                <!-- Card Header -->
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="m-0 fw-bold">Label Print Details</h5>
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body">
+                    <form method="POST" class="form-card">
+                        
+                        <!-- Error message -->
+                        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                        {
+                            <div class="alert alert-danger">
+                                @Model.ErrorMessage
+                            </div>
+                        }
+
+                        <!-- Assembly Item Details -->
+                        @if (Model.AssemblyItem != null)
+                        {
+                            <div class="card shadow-sm border-0 p-3">
+                                <table class="table table-bordered table-hover table-sm w-100">
+                                        <tbody>
+                                            <tr>
+                                                <td class="fw-bold" style="width: 35%; text-align: left;">Label Type:</td>
+                                                <td style="width: 50%; text-align: left;">@Model.labelinfo.Label_Type</td>
+                                                <td class="text-center" style="width: 15%;">
+                                                    <div class="form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input toggle-switch" id="flexSwitchCheckDefault">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold" style="text-align: left;">Case GTIN:</td>
+                                                <td style="text-align: left;">(02)@Model.AssemblyItem.Custitemcustom_Product_Sepc_Case_Gtin</td>
+                                                <td class="text-center">
+                                                    <div class="form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input toggle-switch">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold" style="text-align: left;">Item Code:</td>
+                                                <td style="text-align: left;">@Model.AssemblyItem.ItemId</td>
+                                                <td class="text-center">
+                                                    <div class="form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input toggle-switch">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold" style="text-align: left;">Item Description:</td>
+                                                <td style="text-align: left;">@Model.AssemblyItem.DisplayName</td>
+                                                <td class="text-center">
+                                                    <div class="form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input toggle-switch">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold" style="text-align: left;">Customer SKU:</td>
+                                                <td style="text-align: left;">@Model.AssemblyItem.Custitemproduct_Spec_Sku</td>
+                                                <td class="text-center">
+                                                    <div class="form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input toggle-switch">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold" style="text-align: left;">Customer:</td>
+                                                <td style="text-align: left;">@Model.AssemblyItem.Custitem13</td>
+                                                <td class="text-center">
+                                                    <div class="form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input toggle-switch">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold" style="text-align: left;">Case Qty:</td>
+                                                <td style="text-align: left;">@Model.AssemblyItem.Custitemproduct_Spec_Qtyperinnerlayer</td>
+                                                <td class="text-center">
+                                                    <div class="form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input toggle-switch">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold" style="text-align: left;">Case Weight:</td>
+                                                <td style="text-align: left;">@Model.AssemblyItem.Custitemproduct_Spec_Casewtgrosskg KG</td>
+                                                <td class="text-center">
+                                                    <div class="form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input toggle-switch">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold" style="text-align: left;">Label Quantity:</td>
+                                                <td style="text-align: left;">@Model.labelinfo.Label_Qty</td>
+                                                <td class="text-center">
+                                                    <div class="form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input toggle-switch">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold" style="text-align: left;">Last Label Number:</td>
+                                                <td style="text-align: left;">@Model.labelinfo.Label_No</td>
+                                                <td class="text-center">
+                                                    <div class="form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input toggle-switch">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold" style="text-align: left;">Date Produced:</td>
+                                                <td style="text-align: left;">@Model.labelinfo.Create_Date</td>
+                                                <td class="text-center">
+                                                    <div class="form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input toggle-switch">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold" style="text-align: left;">Best Before:</td>
+                                                <td style="text-align: left;">@Model.labelinfo.Best_Before</td>
+                                                <td class="text-center">
+                                                    <div class="form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input toggle-switch">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold" style="text-align: left;">Expiry:</td>
+                                                <td style="text-align: left;">(15)@Model.labelinfo.Expiry</td>
+                                                <td class="text-center">
+                                                    <div class="form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input toggle-switch">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-left text-muted">No assembly item data available. Please enter an ID to fetch details.</p>
+                        }
+
+                        <div style="background-color: #f8f9fa; border: 2px solid #007bff; border-radius: 10px; padding: 15px; margin-top: 10px; text-align: center; font-size: 18px; font-weight: bold; color: #333; width: 80%; max-width: 500px; margin-left: auto; margin-right: auto; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);">
+                            <span id="selectedItemsText">None</span>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="row justify-content-center text-center mt-4">
+                            <div class="col-sm-6 mb-2">
+                                <button class="btn btn-success btn-lg w-100" id="pdfDownloadLink" onclick="pdprint(); return false;">
+                                    <i class="bi bi-printer"></i> Print
+                                </button>
+                                   
+                            </div>
+                            <div class="col-sm-6 mb-2">
+                                <a class="btn btn-secondary btn-lg w-100" href="Index" role="button">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div> 
+            </div>
+        </div>
+    </div>
+</div>
+
+   
+<div id="templateContents" style="display:none">
+    <div id="labelsContainer">
+
+        <!-- Labels will be dynamically generated here -->
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    try {
+        // Safely retrieve values from Razor
+        let initialLabelNo = Number('@Html.Raw(Model?.labelinfo?.Label_No ?? "0")');
+        let caseGTIN = Number('@Html.Raw(Model?.AssemblyItem?.Custitemcustom_Product_Sepc_Case_Gtin ?? "0")');
+        let labelQty = Number('@Html.Raw(Model?.labelinfo?.Label_Qty ?? 0)');
+        let labelType = '@Html.Raw(Model?.labelinfo?.Label_Type ?? "")';
+        let expiry = '@Html.Raw(Model?.labelinfo?.Expiry ?? "")';
+        let bestBefore = '@Html.Raw(Model?.labelinfo?.Best_Before ?? "")';
+
+        // Ensure the labels container exists
+        const labelsContainer = document.getElementById("labelsContainer");
+        if (!labelsContainer) {
+            console.error("Error: labelsContainer element not found.");
+            return;
+        }
+
+        if (!initialLabelNo || !labelQty || labelQty <= 0) {
+            console.error("Error: Invalid Label_No or Label_Qty. Cannot generate labels.");
+            return;
+        }
+
+        // Helper function to create barcodes
+        function createBarcode(selector, value, format = "CODE128", height = 30) {
+            const barcodeElement = document.querySelector(selector);
+            if (barcodeElement && typeof JsBarcode === "function") {
+                JsBarcode(barcodeElement, value, {
+                    format,
+                    lineColor: "#000",
+                    width: 1.5,
+                    height,
+                    displayValue: false
+                });
+            } else {
+                console.error(`Error: Barcode element ${selector} or JsBarcode not found.`);
+            }
+            }
+
+                
+        // Helper function to encode GS1-128 barcodes with FNC1
+        function encodeGS1128(valueWithAI) {
+            const fnc1 = String.fromCharCode(29); // ASCII 29 for FNC1
+            let encodedValue = ']C1'; // GS1-128 symbology identifier
+            const regex = /\((\d+)\)([^()]+)/g;
+            let match;
+
+            while ((match = regex.exec(valueWithAI)) !== null) {
+                const ai = match[1];
+                const data = match[2];
+                encodedValue += ai + data;
+                if (isVariableLengthAI(ai)) {
+                    encodedValue += fnc1;
+                }
+            }
+            return encodedValue.slice(0, -1);
+        }
+
+        function isVariableLengthAI(ai) {
+            const variableLengthAIs = ['00', '02', '10', '21', '91', '15'];
+            return variableLengthAIs.includes(ai);
+        }
+
+        function calculateCheckDigit(number) {
+            let sum = 0;
+            const reversedDigits = number.toString().split("").reverse();
+            reversedDigits.forEach((digit, index) => {
+                const multiplier = (index % 2 === 0) ? 3 : 1;
+                sum += parseInt(digit, 10) * multiplier;
+            });
+            return (10 - (sum % 10)) % 10;
+        }
+
+        // QR Code Generator using qr-code-styling
+        function generateQRCode(qrCodeId, text) {
+            if (typeof QRCodeStyling !== "function") {
+                console.error("Error: QRCodeStyling library is missing.");
+                return;
+            }
+
+            // Clear previous QR code if exists
+            let container = document.getElementById(qrCodeId);
+            if (!container) {
+                    console.error(`Error: Container #${qrCodeId} not found.`);
+                return;
+            }
+            container.innerHTML = ""; // Prevent duplicate QR codes
+
+            const qrCode = new QRCodeStyling({
+                width: 50, // Adjust for better visibility
+                height: 50,
+                type: "svg", // Better for printing/scaling
+                data: text,
+                dotsOptions: {
+                    color: "#000", // QR code color
+                    type: "rounded" // Stylish look
+                },
+                backgroundOptions: {
+                    color: "#ffffff" // White background
+                },
+                cornersSquareOptions: {
+                    type: "extra-rounded" // Soft corners
+                }
+            });
+
+                qrCode.append(container);
+            }
+
+      
+        if (labelType === "Case")
+            {
+
+            for (let i = 0; i < labelQty; i++) {
+                let currentLabelNo = initialLabelNo - i;
+
+                const labelBlock = document.createElement("div");
+                labelBlock.style.width = "4in";
+                labelBlock.style.height = "6in";
+                labelBlock.style.margin = "0 auto";
+                labelBlock.style.padding = "10px";
+                labelBlock.style.boxSizing = "border-box";
+                labelBlock.style.display = "flex";
+                labelBlock.style.flexDirection = "column";
+                labelBlock.style.alignItems = "center";
+
+                const barcodeId = `barcode-${currentLabelNo}`;
+                const gs1128BarcodeId = `gs1128-barcode-${currentLabelNo}`;
+                const qrCodeId = `qrcode-${currentLabelNo}`;
+
+                    labelBlock.innerHTML = `
+                        <div style="display: flex; align-items: left; justify-content: space-between; width: 100%;">
+                            <img src="/images/mono.jpg" alt="TPL Logo" width="175" height="40">
+                            <svg id="${barcodeId}" style="max-height: 0.3in;"></svg>
+                        </div>
+                        <p style="font-size: 11px;">Ty Dyffryn, Alder Avenue, Dyffryn Business Park, Ystrad Mynach, CF82 7TW</p>
+                        <div style="border-top: 2px solid black; width: 100%;"></div>
+                        <table style="width: 100%;">
+                            <tr>
+                                <td style="width: 30%; text-align: left; font-size: 14px;">Client:</td>
+                                <td style="width: 70%; text-align: left; font-size: 14px; font-weight: bold;">@Model.AssemblyItem.Custitem13</td>
+                            </tr>
+                            <tr>
+                                <td style="width: 30%; text-align: left; font-size: 14px;">Customer SKU:</td>
+                                <td style="width: 70%; text-align: left; font-size: 14px; font-weight: bold;">@Model.AssemblyItem.Custitemproduct_Spec_Sku</td>
+                            </tr>
+                            <tr>
+                                <td style="width: 30%; text-align: left; font-size: 14px;">Description:</td>
+                                <td style="width: 70%; text-align: left; font-size: 14px; font-weight: bold;">@Model.AssemblyItem.DisplayName</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="width: 100%; text-align: left; font-size: 14px;">
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <tr>
+                                            <td style="width: 20%; text-align: left; font-size: 14px;">Case Qty:</td>
+                                            <td style="width: 40%; text-align: left; font-size: 14px; font-weight: bold;">@Model.AssemblyItem.Custitemproduct_Spec_Qtyperinnerlayer</td>
+                                            <td style="width: 20%; text-align: left; font-size: 14px;">Case Wt:</td>
+                                            <td style="width: 40%; text-align: left; font-size: 14px; font-weight: bold;">@Model.AssemblyItem.Custitemproduct_Spec_Casewtgrosskg KG</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                        <div style="border-top: 2px solid black; width: 100%;"></div>
+                        <table style="width: 100%; height: auto; border-collapse: collapse; table-layout: fixed; margin-top: 0;">
+                            <tr>
+                                <td style="width: 30%; text-align: left; font-size: 14px;">Item Code:</td>
+                                <td style="width: 40%; text-align: left; font-size: 14px; font-weight: bold;">@Model.AssemblyItem.ItemId </td>
+                                <td style="width: 30%; text-align: left; font-size: 14px; font-weight: bold;">
+                                    <div id="${qrCodeId}" style="margin: 10px auto;"></div>
+                                </td>
+
+                            </tr>
+                                <tr>
+                                <td style="width: 30%; text-align: left; font-size: 14px;">Date Produced:</td>
+                                <td style="width: 70%; text-align: left; font-size: 14px; font-weight: bold;">@Model.labelinfo.Create_Date</td>
+                            </tr>
+                            <tr>
+                                <td style="width: 30%; text-align: left; font-size: 14px;">Case No.:</td>
+                                <td style="width: 40%; text-align: left; font-size: 14px; font-weight: bold;">${currentLabelNo}</td>
+                                <td style="width: 30%; text-align: left; font-size: 14px; font-weight: bold;">
+                                    <img src="/images/22PAP.png" alt="22PAP" width="50" height="50">
+                                </td>
+                            </tr>
+                        </table>
+                        <div style="display: flex; align-items: center; justify-content: center;">
+                            <svg id="${gs1128BarcodeId}" style="max-height: 0.3in;"></svg>
+                        </div>
+                        <div style="border-top: 2px solid black; width: 100%;"></div>
+            
+                    `;
+
+                    labelsContainer.appendChild(labelBlock);
+
+                    createBarcode(`#${barcodeId}`, currentLabelNo);
+                    createGS1128Barcode(`#${gs1128BarcodeId}`, `(02)${caseGTIN}${calculateCheckDigit(caseGTIN)}`);
+                    generateQRCode(qrCodeId, "@Model.AssemblyItem.ItemId");
+
+                    // Helper function to create GS1-128 barcodes
+                    function createGS1128Barcode(selector, value) {
+                        const barcodeElement = document.querySelector(selector);
+                        if (barcodeElement && typeof JsBarcode === "function") {
+                            JsBarcode(barcodeElement, encodeGS1128(value), {
+                                format: "CODE128",
+                                lineColor: "#000",
+                                width: 1.5,
+                                height: 50,
+                                displayValue: true,
+                                text: value,
+                                fontSize: 14,
+                                margin: 10
+                            });
+                        } else {
+                            console.error(`Error: GS1-128 barcode element ${selector} or JsBarcode not found.`);
+                        }
+                    }
+                }
+            }
+
+                if (labelType === "Pallet") 
+                {
+                for (let i = 0; i < labelQty; i++) {
+                let currentLabelNo = initialLabelNo - i;
+
+                const labelBlock = document.createElement("div");
+                labelBlock.style.width = "6in";
+                labelBlock.style.height = "8in";
+                labelBlock.style.margin = "0 auto";
+                labelBlock.style.padding = "10px";
+                labelBlock.style.boxSizing = "border-box";
+                labelBlock.style.display = "flex";
+                labelBlock.style.flexDirection = "column";
+                labelBlock.style.alignItems = "center";
+
+                const barcodeId = `barcode-${currentLabelNo}`;
+                const gs1128BarcodeId = `gs1128-barcode-${currentLabelNo}`;
+                const gs1128GTINcodeId = `gs1128-GTIN-${currentLabelNo}`;
+                const qrCodeId = `qrcode-${currentLabelNo}`;
+
+                    labelBlock.innerHTML = `
+                            <div style="display: flex; align-items: left; justify-content: space-between; width: 100%; margin-bottom: 0px;">
+                            <img src="/images/mono.jpg" id="bsbSidebarLabel1" class="img-fluid" alt="TPL Logo" width="180" height="50" style="display: block;">
+                            </div>
+                            <p style="margin: 0; font-size: 13px; font-weight: bold; text-align: left;">Ty Dyffryn, Alder Avenue, Dyffryn Business Park, Ystrad Mynach, CF82 7TW</p>
+                            <div style="border-top: 2px solid black; margin: 5px 0; width: 100%;"></div>
+                                
+                            <table style="width: 100%; height: auto; border-collapse: collapse; table-layout: fixed; margin-top: 0;">
+                            <tr>
+                                <td style="width: 25%; text-align: left; font-size: 16px; font-weight: bold;">Customer:</td>
+                                <td style="width: 75%; text-align: left; font-size: 16px; font-weight: bold;">@Model.AssemblyItem.Custitem13</td>
+                            </tr>
+                            <tr>
+                                <td style="width: 25%; text-align: left; font-size: 16px; font-weight: bold;">Description:</td>
+                                <td style="width: 75%; text-align: left; font-size: 20px; font-weight: bold;">@Model.AssemblyItem.DisplayName</td>
+                            </tr>
+                            <tr>
+                                <td style="width: 25%; text-align: left; font-size: 16px; font-weight: bold;">Customer SKU:</td>
+                                <td style="width: 75%; text-align: left; font-size: 16px; font-weight: bold;">@Model.AssemblyItem.Custitemproduct_Spec_Sku</td>
+                            </tr>
+                        </table>
+                        <table style="width: 100%; height: auto; border-collapse: collapse; table-layout: fixed; margin-top: 0;">
+                            <tr>
+                                <td style="width: 30%; text-align: left; font-size: 16px; font-weight: bold;">SSCC:</td>
+                                <td style="width: 70%; text-align: left; font-size: 16px; font-weight: bold;">${currentLabelNo}</td>
+                                <td style="width: 30%; text-align: left; font-size: 16px; font-weight: bold;">GTIN:</td>
+                                <td style="width: 70%; text-align: left; font-size: 16px; font-weight: bold;">${caseGTIN}</td>
+                            </tr>
+                        </table>
+                        <div style="border-top: 2px solid black; margin: 5px 0; width: 100%;"></div>
+                        <table style="width: 100%; height: auto; border-collapse: collapse; table-layout: fixed; margin-top: 0;">
+                            <tr>
+                                <td style="width: 30%; text-align: left; font-size: 16px; font-weight: bold;">Item Code:</td>
+                                <td style="width: 40%; text-align: left; font-size: 16px; font-weight: bold;">@Model.AssemblyItem.ItemId </td>
+                                <td style="width: 30%; text-align: left; font-size: 16px; font-weight: bold;"> 
+                                    <div id="${qrCodeId}" style="margin: 10px auto;"></div>
+                                </td>
+                            </tr>
+                        </table>
+                        <table style="width: 100%; height: auto; border-collapse: collapse; table-layout: fixed; margin-top: 0;">
+                            <tr>
+                                <td style="width: 50%; text-align: left; font-size: 16px; font-weight: bold;">Date Produced:</td>
+                                <td style="width: 50%; text-align: left; font-size: 16px; font-weight: bold;">@Model.labelinfo.Create_Date</td>
+                                <td style="width: 50%; text-align: left; font-size: 16px; font-weight: bold;">Best Before:</td>
+                                <td style="width: 50%; text-align: left; font-size: 16px; font-weight: bold;">${bestBefore}</td>
+                            </tr>
+                        </table>
+                        <table style="width: 100%; height: auto; border-collapse: collapse; table-layout: fixed; margin-top: 0;">
+                            <tr>
+                                <td style="width: 25%; text-align: left; font-size: 16px; font-weight: bold;">Cases:</td>
+                                <td style="width: 25%; text-align: left; font-size: 16px; font-weight: bold;">@Model.AssemblyItem.Custitemproduct_Spec_Caseperpallet</td>
+                                <td style="width: 25%; text-align: left; font-size: 16px; font-weight: bold;">Pices:</td>
+                                <td style="width: 25%; text-align: left; font-size: 16px; font-weight: bold;">@Model.AssemblyItem.Custitemproduct_Spec_Qtyperpallet</td>
+                            </tr>
+                        </table>
+                        <table style="width: 100%; height: auto; border-collapse: collapse; table-layout: fixed; margin-top: 0;">
+                            <tr>
+                                <td style="width: 25%; text-align: left; font-size: 16px; font-weight: bold;">Pallet Wt Net:</td>
+                                <td style="width: 25%; text-align: left; font-size: 16px; font-weight: bold;">@Model.AssemblyItem.Custitemproduct_Spec_Palletwtnetkg KG</td>
+                                <td style="width: 25%; text-align: left; font-size: 16px; font-weight: bold;">Pallet Wt Gross:</td>
+                                <td style="width: 25%; text-align: left; font-size: 16px; font-weight: bold;">@Model.AssemblyItem.Custitemproduct_Spec_Palletwtgrosskg KG</td>
+                            </tr>
+                        </table>
+                                   
+                                       
+                                    
+                        <div style="border-top: 2px solid black; width: 100%;"></div>
+                        <table style="width: 100%; height: auto; border-collapse: collapse; table-layout: fixed; margin-top: 0;">
+                                <tr>
+                                <td style="width: 20%; text-align: left; font-size: 22px; font-weight: bold;">GTIN:</td>
+                                <td style="width: 100%; text-align: left; font-size: 9px; font-weight: bold;">
+                                        <svg id="${gs1128GTINcodeId}" style="max-height: 1in;"></svg> 
+                                </td>
+                                </tr>
+                                <tr>
+                                <td style="width: 20%; text-align: left; font-size: 22px; font-weight: bold;">SSCC:</td>
+                                <td style="width: 100%; text-align: left; font-size: 9px; font-weight: bold;">
+                                    <svg id="${gs1128BarcodeId}" style="max-height: 1in;"></svg>
+                                    <img src="/images/22PAP.png" alt="22PAP" width="100" height="100">  
+                                </td>
+                                </tr>
+                            </table>
+                    `;
+
+                    labelsContainer.appendChild(labelBlock);
+
+                    createBarcode(`#${barcodeId}`, currentLabelNo);
+                    // Generate both SSCC and GTIN barcodes correctly
+                    createGS1128Barcode(`#${gs1128BarcodeId}`, `(00)${currentLabelNo}${calculateCheckDigit(currentLabelNo)}`);
+                    createGS1128Barcode(`#${gs1128GTINcodeId}`, `(02)${caseGTIN}${calculateCheckDigit(caseGTIN)}(15)${expiry}`);
+                    generateQRCode(qrCodeId, "@Model.AssemblyItem.ItemId");
+
+
+                    function updateSelectedItems() {
+                        let selectedValues = "";
+
+                        // Get all checked checkboxes and concatenate their values
+                        document.querySelectorAll('.toggle-switch:checked').forEach((checkbox) => {
+                        let value = checkbox.closest('tr').querySelector('td:nth-child(2)').textContent.trim();
+                            selectedValues += (selectedValues ? "" : "") + value;
+                        });
+
+                        // Update the displayed selected items text
+                        document.getElementById('selectedItemsText').textContent = selectedValues;
+
+                        // Get the existing GS1128 barcode value
+                        let existingBarcodeValue = `(02)${caseGTIN}${calculateCheckDigit(caseGTIN)}`;
+
+                        // Append selected values
+                        let updatedBarcodeValue = existingBarcodeValue + selectedValues;
+
+                        // Regenerate barcode with updated value
+                        createGS1128Barcode(`#${gs1128GTINcodeId}`, updatedBarcodeValue);
+                    }
+
+                    // Attach event listeners to checkboxes
+                    document.querySelectorAll('.toggle-switch').forEach(checkbox => {
+                        checkbox.addEventListener('change', updateSelectedItems);
+                    });
+
+                    // Generate the initial barcode
+                    createGS1128Barcode(`#${gs1128GTINcodeId}`, `(02)${caseGTIN}${calculateCheckDigit(caseGTIN)}`);
+
+
+                    // Generate GS1-128 barcodes (for both SSCC and GTIN)
+                    function createGS1128Barcode(selector, value) {
+                        const barcodeElement = document.querySelector(selector);
+                        if (barcodeElement && typeof JsBarcode === "function") {
+                            JsBarcode(barcodeElement, encodeGS1128(value), {
+                                format: "CODE128",
+                                lineColor: "#000",
+                                width: 1.5,
+                                height: 100,
+                                displayValue: true,
+                                text: value,
+                                fontSize: 14,
+                                margin: 10
+                            });
+                        } else {
+                            console.error(`Error: GS1-128 barcode element ${selector} or JsBarcode not found.`);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Error in label generation:", error);
+        }
+    });
+</script>
+        
+
+        <script>
+            function pdprint() {
+                // Show the loading screen
+                document.getElementById("loadingOverlay").style.display = "flex";
+                let printButton = document.getElementById("printButton");
+                if (printButton) printButton.disabled = true; // Disable button to prevent multiple clicks
+
+                // Select the template element
+                let template = document.getElementById("templateContents");
+
+                // Ensure the element exists
+                if (!template) {
+                    console.error("Error: Label template not found!");
+                    document.getElementById("loadingOverlay").style.display = "none"; // Hide loader
+                    if (printButton) printButton.disabled = false;
+                    return;
+                }
+
+                // Ensure template is visible
+                template.style.display = "block";
+                template.style.backgroundColor = "#FFFFFF"; // Force white background
+                template.style.color = "#000000"; // Ensure text remains visible
+
+                // Determine label type and set dimensions
+                let labelType = '@Html.Raw(Model.labelinfo.Label_Type)';
+                let pageWidth, pageHeight;
+
+                if (labelType === "Case") {
+                    pageWidth = 4;
+                    pageHeight = 6;
+                } else if (labelType === "Pallet") {
+                    pageWidth = 6;
+                    pageHeight = 8;
+                } else {
+                    console.error("Unknown Label_Type:", labelType);
+                    document.getElementById("loadingOverlay").style.display = "none"; // Hide loader if error occurs
+                    if (printButton) printButton.disabled = false;
+                    return;
+                }
+
+                // Ask user if they want to download or print
+                let userChoice = confirm("Do you want to download the label as a PDF? Click 'Cancel' to print directly.");
+
+                // PDF generation options
+                var opt = {
+                    margin: 0,
+                    image: { type: 'jpeg', quality: 1.0 },
+                    html2canvas: {
+                        scale: 12, // Higher scale for better resolution
+                        useCORS: true,
+                        allowTaint: false, // Better security handling
+                        logging: false,
+                        backgroundColor: "#FFFFFF" // Ensures white background in capture
+                    },
+                    jsPDF: {
+                        unit: 'in',
+                        format: [pageWidth, pageHeight],
+                        orientation: 'portrait'
+                    }
+                };
+
+                if (userChoice) {
+                    // User chose to download the PDF
+                    window.html2pdf()
+                    .set(opt)
+                    .from(template)
+                    .toPdf()
+                    .get('pdf')
+                    .then(function (pdf) {
+                        let blob = pdf.output('blob');
+                        let blobUrl = URL.createObjectURL(blob);
+
+                        // Trigger PDF download
+                        let link = document.createElement('a');
+                        link.href = blobUrl;
+                        link.download = 'label.pdf'; // You can customize the filename here
+                        link.click();
+                    })
+                    .finally(function () {
+                        // Hide the loading screen after processing
+                        document.getElementById("loadingOverlay").style.display = "none";
+                        if (printButton) printButton.disabled = false; // Re-enable button
+                    });
+                } else {
+                    // User chose to print directly
+                    window.html2pdf()
+                    .set(opt)
+                    .from(template)
+                    .toPdf()
+                    .get('pdf')
+                    .then(function (pdf) {
+                        let blob = pdf.output('blob');
+                        let blobUrl = URL.createObjectURL(blob);
+
+                        // Open the PDF in a new tab for printing
+                        let newWindow = window.open(blobUrl, '_blank');
+
+                        // Automatically trigger the print dialog after a short delay
+                        setTimeout(() => {
+                            if (newWindow) {
+                                newWindow.focus();
+                                newWindow.print();
+                            }
+                        }, 1000);
+                    })
+                    .finally(function () {
+                        // Hide the loading screen after processing
+                        document.getElementById("loadingOverlay").style.display = "none";
+                        if (printButton) printButton.disabled = false; // Re-enable button
+                    });
+                }
+            }
+        </script>
+
+
+}
+</body>
+
+
+
+
