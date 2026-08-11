@@ -164,7 +164,7 @@ This project forms part of a wider portfolio of enterprise software systems desi
 **Rakib Ahmed**
 Senior Software Engineer | Full-Stack .NET Developer | Manufacturing Systems Engineer
 
-[LinkedIn](https://www.linkedin.com/in/rakibuddinahmed) · [GitHub](https://github.com/rakib-usw) · [YouTube](https://www.youtube.com/@RakibsTechStudio)
+[LinkedIn](https://www.linkedin.com/in/rakibuddinahmed) · [GitHub](https://github.com/rakib-uktech) · [YouTube](https://www.youtube.com/@RakibsTechStudio)
 
 ---
 
