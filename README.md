@@ -144,7 +144,7 @@ Provides the final production printing workflow, allowing operators to generate 
 Clone the repository:
 
 ```bash
-git clone https://github.com/rakib-usw/Manufacturing_Label_Maker.git
+git clone https://github.com/rakib-uktech/Manufacturing-Label-Maker.git
 ```
 
 Open the project in Visual Studio and run:
