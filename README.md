@@ -2,8 +2,6 @@
 
 **Enterprise web-based label configuration and printing system for standardising production label generation in manufacturing environments.**
 
-<img width="1536" height="1024" alt="Manufacturing Label Maker — Software Architecture Diagram" src="https://github.com/user-attachments/assets/6706ce29-54b0-49a9-9850-8b3893418e20" />
-
 ---
 
 ## Overview
@@ -51,6 +49,8 @@ The system was independently designed, developed, and deployed by me, and is cur
 ## System Architecture
 
 The application follows a standard web-based architecture: users interact with a web interface, which communicates with backend services responsible for processing label data and managing print jobs.
+<img width="883" height="588" alt="image" src="https://github.com/user-attachments/assets/f3d0f048-282f-49d2-a91a-dc9419c274ea" />
+
 
 **Frontend**
 - Razor Pages
@@ -91,15 +91,51 @@ The application follows a standard web-based architecture: users interact with a
 
 ## Screenshots
 
-<img width="503" height="430" alt="Label Configuration Screen" src="https://github.com/user-attachments/assets/faea2292-5d1d-4418-a231-9f1751dfcff8" />
+The following screenshots demonstrate the main label management, template configuration, label generation, preview, and production printing capabilities of the Manufacturing Label Maker.
 
-<img width="446" height="580" alt="Label Template Selection" src="https://github.com/user-attachments/assets/651bbf37-636e-4ff7-949f-cfc122646402" />
+### 1. Label Management & Dashboard
 
-<img width="1881" height="657" alt="Label Management Dashboard" src="https://github.com/user-attachments/assets/883a1d6a-ab57-4e63-95d9-0734af57e6bd" />
+#### Label Management Dashboard
 
-<img width="456" height="641" alt="Label Preview Screen" src="https://github.com/user-attachments/assets/8580c9ce-95ae-4c55-98b0-956d67ca86f5" />
+Provides a centralised interface for managing production labels, label configurations, and printing activities.
 
-<img width="509" height="707" alt="Barcode and QR Code Generation" src="https://github.com/user-attachments/assets/13f62932-d398-402d-baf3-3c5ded1e7177" />
+<img width="891" height="426" alt="Label Management Dashboard" src="https://github.com/user-attachments/assets/129c1aac-5dae-4da6-b306-9c1fcae6b436" />
+
+#### Label List & Search
+
+Allows users to search, review, and manage configured labels and associated production information.
+
+<img width="869" height="473" alt="Label List and Search" src="https://github.com/user-attachments/assets/4277e12c-d219-4bf9-8ed4-813f148c65d4" />
+
+---
+
+### 2. Template Management & Label Generation
+
+#### Label Template Selection
+
+Allows operators to select approved label templates before generating production labels, helping maintain standardised labelling across manufacturing operations.
+
+<img width="480" height="767" alt="Label Template Selection" src="https://github.com/user-attachments/assets/73403535-1970-4780-a91c-5eb322decfca" />
+
+---
+
+### 3. Label Preview & Verification
+
+#### Label Preview
+
+Provides a preview of the generated label before printing, allowing operators to verify label content, formatting, and production information.
+
+<img width="505" height="627" alt="Label Preview Screen" src="https://github.com/user-attachments/assets/dfff3b6b-3b77-4fcf-b68d-2398eb1d175b" />
+
+---
+
+### 4. Production Label Printing
+
+#### Production Label Printing
+
+Provides the final production printing workflow, allowing operators to generate and send approved labels to connected network label printers.
+
+<img width="449" height="601" alt="Production Label Printing" src="https://github.com/user-attachments/assets/17fcddd8-1b76-480f-b846-5ce40afe1f7d" />
 
 ---
 
